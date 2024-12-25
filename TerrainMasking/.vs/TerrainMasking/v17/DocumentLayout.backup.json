@@ -1,0 +1,58 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Repos\\TerrainMasking\\TerrainMasking\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{15D147FE-CCE0-9766-00CB-FF5F947B79BC}|Assembly-CSharp.csproj|d:\\repos\\terrainmasking\\terrainmasking\\assets\\boxophobic\\the visual engine modules\\terrain shaders\\core\\shaders\\landscape\\terrain standard lit.shader||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{15D147FE-CCE0-9766-00CB-FF5F947B79BC}|Assembly-CSharp.csproj|solutionrelative:assets\\boxophobic\\the visual engine modules\\terrain shaders\\core\\shaders\\landscape\\terrain standard lit.shader||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15D147FE-CCE0-9766-00CB-FF5F947B79BC}|Assembly-CSharp.csproj|d:\\repos\\terrainmasking\\terrainmasking\\assets\\boxophobic\\the visual engine modules\\terrain shaders\\core\\shaders\\landscape\\terrain simple lit.shader||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{15D147FE-CCE0-9766-00CB-FF5F947B79BC}|Assembly-CSharp.csproj|solutionrelative:assets\\boxophobic\\the visual engine modules\\terrain shaders\\core\\shaders\\landscape\\terrain simple lit.shader||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Terrain Standard Lit.shader",
+              "DocumentMoniker": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\BOXOPHOBIC\\The Visual Engine Modules\\Terrain Shaders\\Core\\Shaders\\Landscape\\Terrain Standard Lit.shader",
+              "RelativeDocumentMoniker": "Assets\\BOXOPHOBIC\\The Visual Engine Modules\\Terrain Shaders\\Core\\Shaders\\Landscape\\Terrain Standard Lit.shader",
+              "ToolTip": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\BOXOPHOBIC\\The Visual Engine Modules\\Terrain Shaders\\Core\\Shaders\\Landscape\\Terrain Standard Lit.shader",
+              "RelativeToolTip": "Assets\\BOXOPHOBIC\\The Visual Engine Modules\\Terrain Shaders\\Core\\Shaders\\Landscape\\Terrain Standard Lit.shader",
+              "ViewState": "AgIAABidAAAAAAAAAAAAANudAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002777|",
+              "WhenOpened": "2024-12-25T11:51:43.31Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Terrain Simple Lit.shader",
+              "DocumentMoniker": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\BOXOPHOBIC\\The Visual Engine Modules\\Terrain Shaders\\Core\\Shaders\\Landscape\\Terrain Simple Lit.shader",
+              "RelativeDocumentMoniker": "Assets\\BOXOPHOBIC\\The Visual Engine Modules\\Terrain Shaders\\Core\\Shaders\\Landscape\\Terrain Simple Lit.shader",
+              "ToolTip": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\BOXOPHOBIC\\The Visual Engine Modules\\Terrain Shaders\\Core\\Shaders\\Landscape\\Terrain Simple Lit.shader",
+              "RelativeToolTip": "Assets\\BOXOPHOBIC\\The Visual Engine Modules\\Terrain Shaders\\Core\\Shaders\\Landscape\\Terrain Simple Lit.shader",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002777|",
+              "WhenOpened": "2024-12-25T11:48:51.426Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

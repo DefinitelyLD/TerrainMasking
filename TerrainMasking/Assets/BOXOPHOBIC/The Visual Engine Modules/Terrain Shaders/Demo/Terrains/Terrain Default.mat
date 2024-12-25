@@ -90,17 +90,16 @@ Material:
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2450
+  m_CustomRenderQueue: -1
   stringTagMap:
     NatureRendererInstancing: true
-    RenderType: Opaque
   disabledShaderPasses:
   - TransparentBackface
   - TransparentBackfaceDebugDisplay
   - TransparentDepthPrepass
   - TransparentDepthPostpass
   - MOTIONVECTORS
-  m_LockedProperties: 
+  m_LockedProperties: _RenderSSR
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -621,7 +620,7 @@ Material:
     - _ColorsMaskMinValue: 0
     - _ColorsMaskValue: 1
     - _ColorsPositionMode: 0
-    - _ConformCategory: 1
+    - _ConformCategory: 0
     - _ConformEnd: 1
     - _ConformHeightMode: 0
     - _ConformHeightValue: 1
