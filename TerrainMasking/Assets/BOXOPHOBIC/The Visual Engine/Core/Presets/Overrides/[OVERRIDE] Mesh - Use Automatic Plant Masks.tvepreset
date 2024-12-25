@@ -1,0 +1,14 @@
+*******************************************************************
+*                            OVERRIDE                             *
+*******************************************************************
+
+InfoStatus Mesh conversion is set to Automaic Plants setup!
+
+*******************************************************************
+
+Mesh SetRed GET_MASK_PROCEDURAL 3
+Mesh SetGreen GET_MASK_PROCEDURAL 5
+Mesh SetBlue GET_MASK_PROCEDURAL 5
+Mesh SetAlpha GET_MASK_PROCEDURAL 4
+
+Mesh SetPivots NONE

@@ -1,0 +1,15 @@
+*******************************************************************
+*                            OVERRIDE                             *
+*******************************************************************
+
+InfoStatus Mesh conversion is set to Automaic Conifer setup!
+
+*******************************************************************
+
+Mesh SetRed GET_MASK_PROCEDURAL 3
+Mesh SetGreen GET_MASK_PROCEDURAL 6
+Mesh SetBlue GET_MASK_FROM_CHANNEL 5
+Mesh SetAlpha GET_MASK_PROCEDURAL 4
+
+Mesh SetExtraCoord NONE
+Mesh SetPivots NONE

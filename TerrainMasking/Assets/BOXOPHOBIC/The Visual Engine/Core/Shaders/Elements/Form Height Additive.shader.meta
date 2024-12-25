@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 48a1441fa8e4e3147b2b1e04bf7b25d3
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 286827
+  packageName: The Visual Engine
+  packageVersion: 20.5.0
+  assetPath: Assets/BOXOPHOBIC/The Visual Engine/Core/Shaders/Elements/Form Height
+    Additive.shader
+  uploadId: 716672
