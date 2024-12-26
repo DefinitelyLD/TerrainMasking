@@ -40,62 +40,63 @@ namespace TerrainPloughTools
         #region FEILDS
         
         [Header("Brush Settings:")]
+
         [Tooltip("The width of the plough brush in texels related to terrain's height map.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private int BrushWidth = 64;
         [Tooltip("The height of the plough brush in texels related to terrain's height map.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private int BrushHeight = 64;
         [Tooltip("Less the value more time to hold at a position to reach the max altitude. High value = less smoothess in elevation.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private float Hardness = 10;
         [Tooltip("The current angle of the brush.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private float Angle;
         [Tooltip("The index of the brush to use from brushmasks set.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private int ActiveBrushIndex;
 
         [Header("Pattern Settings:")]
         [Tooltip("The sum of the total crests and troughs form or fit in brush size.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private float Frequency = 31;
         [Tooltip("The height to wave in world's position or scale.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private float Amplitude = 0.005f;
 
         [Header("Mode:")]
         [Tooltip("Brush behaviour.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private BrushMode Mode = BrushMode.Lines;
 
         [Header("Spiral Settings:")]
         [Tooltip("Width or thichness of the line creating spiral. Like a marbel carving in sand, its the diameter of that marbel.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private int DotDiameter = 10;
         [Tooltip("Starting radius or distance from centre the marbel or the dot is, during making spirals.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private float Radius = 0.5f;
         [Tooltip("The speed by which the spiral will move outward, or the speed of the radius to increase.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private float ExpendSpeed = 0.25f;
         [Tooltip("The rotation speed or speed to increase the angle of the brush, the speed of carving spiral. High values can create cuts in spirals !")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private float RotateSpeed = 50f;
 
         [Header("Curvey Settings:")]
         [Tooltip("Minimum change in cursor position in screen space to be considered as cursor moved, not impotant. I think this setting is bad.")]
-        //[SerializeField]
+        //[SerializeField] [DebugInfoAttribute]
         private float RotationStabelization = 0.00f;
 
         [Header("Flatten Settings: ")]
         [Tooltip("The max world height to reach.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private float FlattenHeight = 1f;
 
         [Header("Paint Settings:")]
         [Tooltip("The index of the layer to paint in Terrain Layers Set.")]
-        [SerializeField]
+        [SerializeField] [DebugInfoAttribute]
         private int PaintLayer;
 
         [Header("Misc:")]
@@ -1692,5 +1693,8 @@ namespace TerrainPloughTools
             return _saveLoadSystem.QuerySaves();
         }
         #endregion
+
+        [System.AttributeUsage(System.AttributeTargets.All, Inherited = false, AllowMultiple = false)]
+        public sealed class DebugInfoAttribute : Attribute {}
     }
 }

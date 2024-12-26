@@ -597,14 +597,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41e861cd5dbf035409e406390cd0ed28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BrushWidth: 64
-  BrushHeight: 64
+  BrushWidth: 128
+  BrushHeight: 128
   Hardness: 42.6
   Angle: 0
   ActiveBrushIndex: 0
   Frequency: 31
-  Amplitude: 0.005
-  Mode: 4
+  Amplitude: 0.05
+  Mode: 0
   DotDiameter: 10
   Radius: 0.5
   ExpendSpeed: 0.25
@@ -617,6 +617,8 @@ MonoBehaviour:
   RaycastCamera: {fileID: 1823688466}
   TerrainLayers: {fileID: 11400000, guid: 9c187ded89a643e488742508d8614281, type: 2}
   Brushes: {fileID: 11400000, guid: eaf9b9ffac3785748ae9732176609857, type: 2}
+  MaskedAreaHeight: 0
+  MaskBorderSize: 2
   BatchCount: 16
   FrameSkipping: 0
   HardwareAcceleration: 1

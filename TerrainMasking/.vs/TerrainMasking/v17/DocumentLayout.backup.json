@@ -3,16 +3,24 @@
   "WorkspaceRootPath": "D:\\Repos\\TerrainMasking\\TerrainMasking\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|d:\\repos\\terrainmasking\\terrainmasking\\assets\\terrinploughtools\\tool\\scripts\\editor\\terrainploughtooleditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|solutionrelative:assets\\terrinploughtools\\tool\\scripts\\editor\\terrainploughtooleditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|D:\\Repos\\TerrainMasking\\TerrainMasking\\assets\\terrinploughtools\\tool\\scripts\\terrainploughtool.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|solutionrelative:assets\\terrinploughtools\\tool\\scripts\\terrainploughtool.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{15D147FE-CCE0-9766-00CB-FF5F947B79BC}|Assembly-CSharp.csproj|d:\\repos\\terrainmasking\\terrainmasking\\assets\\terrinploughtools\\tool\\shaders\\ploughshader.shader||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{15D147FE-CCE0-9766-00CB-FF5F947B79BC}|Assembly-CSharp.csproj|solutionrelative:assets\\terrinploughtools\\tool\\shaders\\ploughshader.shader||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|d:\\repos\\terrainmasking\\terrainmasking\\assets\\terrinploughtools\\tool\\scripts\\terrainmasktest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|solutionrelative:assets\\terrinploughtools\\tool\\scripts\\terrainmasktest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{15D147FE-CCE0-9766-00CB-FF5F947B79BC}|Assembly-CSharp.csproj|d:\\repos\\terrainmasking\\terrainmasking\\assets\\scripts\\terrainmasktest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{15D147FE-CCE0-9766-00CB-FF5F947B79BC}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\terrainmasktest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\Scripts\\TerrainMaskTest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Assets\\Scripts\\TerrainMaskTest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15D147FE-CCE0-9766-00CB-FF5F947B79BC}|Assembly-CSharp.csproj|D:\\Repos\\TerrainMasking\\TerrainMasking\\assets\\terrinploughtools\\tool\\shaders\\ploughshader.shader||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{15D147FE-CCE0-9766-00CB-FF5F947B79BC}|Assembly-CSharp.csproj|solutionrelative:assets\\terrinploughtools\\tool\\shaders\\ploughshader.shader||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,30 +30,30 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "PloughShader.shader",
-              "DocumentMoniker": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Shaders\\PloughShader.shader",
-              "RelativeDocumentMoniker": "Assets\\TerrinPloughTools\\Tool\\Shaders\\PloughShader.shader",
-              "ToolTip": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Shaders\\PloughShader.shader",
-              "RelativeToolTip": "Assets\\TerrinPloughTools\\Tool\\Shaders\\PloughShader.shader",
-              "ViewState": "AgIAAGIBAAAAAAAAAAAiwP8BAAB+AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002777|",
-              "WhenOpened": "2024-12-26T04:37:24.822Z",
+              "DocumentIndex": 0,
+              "Title": "TerrainPloughToolEditor.cs",
+              "DocumentMoniker": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Scripts\\Editor\\TerrainPloughToolEditor.cs",
+              "RelativeDocumentMoniker": "Assets\\TerrinPloughTools\\Tool\\Scripts\\Editor\\TerrainPloughToolEditor.cs",
+              "ToolTip": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Scripts\\Editor\\TerrainPloughToolEditor.cs",
+              "RelativeToolTip": "Assets\\TerrinPloughTools\\Tool\\Scripts\\Editor\\TerrainPloughToolEditor.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAqwDsAAACoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-26T06:01:00.61Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "TerrainPloughTool.cs",
               "DocumentMoniker": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainPloughTool.cs",
               "RelativeDocumentMoniker": "Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainPloughTool.cs",
               "ToolTip": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainPloughTool.cs",
               "RelativeToolTip": "Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainPloughTool.cs",
-              "ViewState": "AgIAAF0AAAAAAAAAAAAAAF0AAAApAAAAAAAAAA==",
+              "ViewState": "AgIAAB4AAAAAAAAAAAA1wDgAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-25T14:51:26.933Z",
               "EditorCaption": ""
@@ -54,14 +62,37 @@
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "TerrainMaskTest.cs",
+              "DocumentMoniker": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainMaskTest.cs",
+              "RelativeDocumentMoniker": "Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainMaskTest.cs",
+              "ToolTip": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainMaskTest.cs",
+              "RelativeToolTip": "Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainMaskTest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABLAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-26T05:53:17.799Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PloughShader.shader",
+              "DocumentMoniker": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Shaders\\PloughShader.shader",
+              "RelativeDocumentMoniker": "Assets\\TerrinPloughTools\\Tool\\Shaders\\PloughShader.shader",
+              "ToolTip": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Shaders\\PloughShader.shader",
+              "RelativeToolTip": "Assets\\TerrinPloughTools\\Tool\\Shaders\\PloughShader.shader",
+              "ViewState": "AgIAAGIBAAAAAAAAAAAiwP8BAAB+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002777|",
+              "WhenOpened": "2024-12-26T04:37:24.822Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "TerrainMaskTest.cs",
               "DocumentMoniker": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\Scripts\\TerrainMaskTest.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\TerrainMaskTest.cs",
               "ToolTip": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\Scripts\\TerrainMaskTest.cs",
               "RelativeToolTip": "Assets\\Scripts\\TerrainMaskTest.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAkwBUAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-25T15:25:17.56Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-25T15:25:17.56Z"
             }
           ]
         }
