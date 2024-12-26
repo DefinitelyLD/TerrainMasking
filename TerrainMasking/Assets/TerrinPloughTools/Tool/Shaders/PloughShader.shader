@@ -490,5 +490,38 @@ HLSLPROGRAM
             }
 ENDHLSL
         }
+
+        // mask pass
+        Pass {
+HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            float4 _Params;
+
+            float4 frag (v2f i) : SV_Target
+            {
+                float2 uv = i.uv;
+
+                float mask = tex2D(_Mask, uv).r;
+                float height = tex2D(_MainTex, uv).r;
+
+                float leftMask   =  tex2D(_Mask, float2(((uv.x * _Params.y) - _Params.z) / _Params.y, uv.y)).r;
+                float rightMask  =  tex2D(_Mask, float2(((uv.x * _Params.y) + _Params.z) / _Params.y, uv.y)).r;
+                float topMask    =  tex2D(_Mask, float2(uv.x,                                  ((uv.y * _Params.y) + _Params.z) / _Params.y)).r;
+                float bottomMask =  tex2D(_Mask, float2(uv.x,                                  ((uv.y * _Params.y) - _Params.z) / _Params.y)).r;
+
+                float newHeight = _Params.x;
+
+                if((mask > 0.5 && leftMask > 0.5 && rightMask > 0.5) &&
+                   (mask > 0.5 && bottomMask > 0.5 && topMask > 0.5))
+                {
+                    newHeight = height;
+                }
+
+                return float4(newHeight, 0, 0, 0);
+            }
+ENDHLSL
+        }
     }
 }

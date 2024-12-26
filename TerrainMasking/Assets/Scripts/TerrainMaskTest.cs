@@ -27,8 +27,7 @@ public class TerrainMaskTest : MonoBehaviour
         for (var i = 0; i < resolution; i++) {
             for (var j = 0; j < resolution; j++) {
                 var pixel = Texture.GetPixel(i, j);
-                holes[j, i] = pixel.r > 0f; // Adjust threshold as needed
-                print(pixel);
+                holes[j, i] = pixel.r > 0.5f; // Adjust threshold as needed
             }
         }
 

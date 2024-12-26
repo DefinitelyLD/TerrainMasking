@@ -120,6 +120,14 @@ namespace TerrainPloughTools
         [SerializeField]
         private BrushmasksSet Brushes;
 
+        [Header("Mask:")]
+        [Tooltip("The height to set in masked area, its normalized value.")]
+        [SerializeField]
+        private float MaskedAreaHeight = 0;
+        [Tooltip("The mask border in texels, it's to fix the void visuals thourgh terrain when the height is increased at edges.")]
+        [SerializeField]
+        private float MaskBorderSize = 2;
+
         [Header("Perfomance Settings:")]
         [Tooltip("The dimension of tiles in which to divide the brush. Only for CPU based.")]
         [SerializeField]
@@ -274,6 +282,8 @@ namespace TerrainPloughTools
         private ModifyHeightsCommand _currentHeightCommand;
         private ModifySplatsCommand _currentAlphamapsCommand;
 
+        private RenderTexture _maskPassRenderTexture;
+
 #if LOG_ENABLED
         private Stopwatch _stopwatch = new ();
         private long _elaspedTime;
@@ -356,7 +366,7 @@ namespace TerrainPloughTools
 #if LOG_ENABLED
                 _stopwatch.Start();
 #endif
-                Terrain.terrainData.SyncTexture("alphamap");
+                Terrain.terrainData.SyncTexture(TerrainData.AlphamapTextureName);
 #if LOG_ENABLED
                 _stopwatch.Stop();
                 Debug.Log($"Auto Synced: Terrain Alphamsps. Time Took: {_stopwatch.ElapsedMilliseconds}ms");
@@ -634,6 +644,16 @@ namespace TerrainPloughTools
                         _renderTexture = new RenderTexture(size, size, 0, Terrain.heightmapFormat, 0);
                     }
 
+                    if (_maskPassRenderTexture != null) {
+                        if (_maskPassRenderTexture.CheckSize(_heightmapResolution, _heightmapResolution) == false) {
+                            _maskPassRenderTexture.Release();
+
+                            _maskPassRenderTexture = new RenderTexture(_heightmapResolution, _heightmapResolution, 0, Terrain.heightmapFormat, 0);
+                        }
+                    } else {
+                        _maskPassRenderTexture = new RenderTexture(_heightmapResolution, _heightmapResolution, 0, Terrain.heightmapFormat, 0);
+                    }
+
                     if (_currentHeightmapTexture != null) {
                         if (_currentHeightmapTexture.CheckSize(size, size) == false) {
                             _currentHeightmapTexture.Release();
@@ -767,13 +787,6 @@ namespace TerrainPloughTools
                                 break;
                         }
 
-                        // sending the result of new calculated heightmap's brush region to the terrain.
-                        TerrainHeightmapSyncControl syncControl = TerrainHeightmapSyncControl.None;
-                        if (SyncMode == TerrainSyncMode.Forced)
-                            syncControl = TerrainHeightmapSyncControl.HeightAndLod;
-                        else if (SyncMode == TerrainSyncMode.Partial || SyncMode == TerrainSyncMode.PartialAuto)
-                            syncControl = TerrainHeightmapSyncControl.HeightOnly;
-
                         Vector2Int slicedSize = new Vector2Int(size, size);
                         Vector2Int slicedPos = new Vector2Int(_texelPos.x, _texelPos.y);
                         Vector2Int offset = new Vector2Int();
@@ -802,10 +815,24 @@ namespace TerrainPloughTools
                         if(((_texelPos.x + size < 0 || _texelPos.x > textureResolution) ||
                            (_texelPos.y + size < 0 || _texelPos.y > textureResolution)) == false)
                         {
-                            Terrain.terrainData.CopyActiveRenderTextureToHeightmap(new RectInt(offset.x, offset.y, slicedSize.x, slicedSize.y), new Vector2Int(slicedPos.x, slicedPos.y), syncControl);
-                            RenderTexture.active = originalRenderTexture;
+                            // sending the result of new calculated heightmap's brush region to the terrain.
+                            TerrainHeightmapSyncControl syncControl = TerrainHeightmapSyncControl.None;
+                            if (SyncMode == TerrainSyncMode.Forced)
+                                syncControl = TerrainHeightmapSyncControl.HeightAndLod;
+                            else if (SyncMode == TerrainSyncMode.Partial || SyncMode == TerrainSyncMode.PartialAuto)
+                                syncControl = TerrainHeightmapSyncControl.HeightOnly;
 
+                            Terrain.terrainData.CopyActiveRenderTextureToHeightmap(new RectInt(offset.x, offset.y, slicedSize.x, slicedSize.y), new Vector2Int(slicedPos.x, slicedPos.y), syncControl);
                             _dirtyHeightmap = SyncMode != TerrainSyncMode.Forced && SyncMode != TerrainSyncMode.Partial;
+
+
+                            // masking 
+                            _ploughMaterial.SetTexture("_Mask", Terrain.terrainData.holesTexture);
+                            _ploughMaterial.SetVector("_Params", new Vector4((MaskedAreaHeight / Terrain.terrainData.size.y) * 0.5f, _heightmapResolution, MaskBorderSize, 0));
+                            Graphics.Blit(Terrain.terrainData.heightmapTexture, _maskPassRenderTexture, _ploughMaterial, 9);
+                            Terrain.terrainData.CopyActiveRenderTextureToHeightmap(new RectInt(0, 0, textureResolution, textureResolution), Vector2Int.zero, TerrainHeightmapSyncControl.None);
+
+                            RenderTexture.active = originalRenderTexture;
                         }
                     }
                     else {
@@ -883,7 +910,7 @@ namespace TerrainPloughTools
                                 Graphics.Blit(Terrain.terrainData.alphamapTextures[i], _splatRenderTexture, _ploughMaterial, 8);
                             }
 
-                            Terrain.terrainData.CopyActiveRenderTextureToTexture("alphamap", i,
+                            Terrain.terrainData.CopyActiveRenderTextureToTexture(TerrainData.AlphamapTextureName, i,
                                 new RectInt(offset.x, offset.y, slicedSize.x, slicedSize.y), new Vector2Int(slicedPos.x, slicedPos.y), sync);
                         }
                         RenderTexture.active = originalRenderTexture;
@@ -1260,10 +1287,12 @@ namespace TerrainPloughTools
 
 #if TERRAIN_CHILDREN
             Terrain.terrainData.SyncHeightmap();
-            Terrain.terrainData.SyncTexture("alphamap");
+            Terrain.terrainData.SyncTexture(TerrainData.AlphamapTextureName);
             _dirtyHeightmap = false;
             _dirtyAlphamap = false;
 #endif
+            if (_maskPassRenderTexture != null)
+                _maskPassRenderTexture.Release();
 
             if (_brushmaskRescaleTexture != null)
                 _brushmaskRescaleTexture.Release();
@@ -1630,6 +1659,11 @@ namespace TerrainPloughTools
 
         public void Save(string fileName) {
             Debug.Assert(fileName != null);
+
+            // hard sync if the sync mode is none
+            Terrain.terrainData.SyncHeightmap();
+            Terrain.terrainData.SyncTexture(TerrainData.AlphamapTextureName);
+
             _saveLoadSystem.Save(Terrain, fileName);
         }
         public void Load(string fileName) {
@@ -1637,7 +1671,7 @@ namespace TerrainPloughTools
             HardSyncJobs();
 
             Terrain.terrainData.SyncHeightmap();
-            Terrain.terrainData.SyncTexture("alphamap");
+            Terrain.terrainData.SyncTexture(TerrainData.AlphamapTextureName);
             _dirtyHeightmap = false;
             _dirtyAlphamap = false;
 
