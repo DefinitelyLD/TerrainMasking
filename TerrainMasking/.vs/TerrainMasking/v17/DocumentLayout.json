@@ -3,15 +3,15 @@
   "WorkspaceRootPath": "D:\\Repos\\TerrainMasking\\TerrainMasking\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|d:\\repos\\terrainmasking\\terrainmasking\\assets\\terrinploughtools\\tool\\scripts\\editor\\terrainploughtooleditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|solutionrelative:assets\\terrinploughtools\\tool\\scripts\\editor\\terrainploughtooleditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|D:\\Repos\\TerrainMasking\\TerrainMasking\\assets\\terrinploughtools\\tool\\scripts\\terrainploughtool.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|solutionrelative:assets\\terrinploughtools\\tool\\scripts\\terrainploughtool.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|d:\\repos\\terrainmasking\\terrainmasking\\assets\\terrinploughtools\\tool\\scripts\\terrainmasktest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|d:\\repos\\terrainmasking\\terrainmasking\\assets\\terrinploughtools\\tool\\scripts\\editor\\terrainploughtooleditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|solutionrelative:assets\\terrinploughtools\\tool\\scripts\\editor\\terrainploughtooleditor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|D:\\Repos\\TerrainMasking\\TerrainMasking\\assets\\terrinploughtools\\tool\\scripts\\terrainmasktest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1EE97ED0-07D5-C887-C963-74AE550328EB}|TerrainPloughTools.csproj|solutionrelative:assets\\terrinploughtools\\tool\\scripts\\terrainmasktest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -30,30 +30,30 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "TerrainPloughToolEditor.cs",
               "DocumentMoniker": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Scripts\\Editor\\TerrainPloughToolEditor.cs",
               "RelativeDocumentMoniker": "Assets\\TerrinPloughTools\\Tool\\Scripts\\Editor\\TerrainPloughToolEditor.cs",
               "ToolTip": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Scripts\\Editor\\TerrainPloughToolEditor.cs",
               "RelativeToolTip": "Assets\\TerrinPloughTools\\Tool\\Scripts\\Editor\\TerrainPloughToolEditor.cs",
-              "ViewState": "AgIAABgAAAAAAAAAAAAqwDsAAACoAAAAAAAAAA==",
+              "ViewState": "AgIAABgAAAAAAAAAAAAqwDYAAAA8AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-26T06:01:00.61Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "TerrainPloughTool.cs",
               "DocumentMoniker": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainPloughTool.cs",
               "RelativeDocumentMoniker": "Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainPloughTool.cs",
               "ToolTip": "D:\\Repos\\TerrainMasking\\TerrainMasking\\Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainPloughTool.cs",
               "RelativeToolTip": "Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainPloughTool.cs",
-              "ViewState": "AgIAAB4AAAAAAAAAAAA1wDgAAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAABsBAAAAAAAAAAAewDABAAB0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-12-25T14:51:26.933Z",
               "EditorCaption": ""
@@ -68,8 +68,7 @@
               "RelativeToolTip": "Assets\\TerrinPloughTools\\Tool\\Scripts\\TerrainMaskTest.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-26T05:53:17.799Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-12-26T05:53:17.799Z"
             },
             {
               "$type": "Document",
