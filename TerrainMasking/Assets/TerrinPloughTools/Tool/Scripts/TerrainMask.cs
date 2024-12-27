@@ -4,7 +4,7 @@ using UnityEngine;
 namespace TerrainPloughTools {
 
     [RequireComponent(typeof(Terrain))]
-    internal sealed class TerrainMask : MonoBehaviour {
+    public sealed class TerrainMask : MonoBehaviour {
 
         [Header("References:")]
         [Tooltip("The mask to apply on terrin.")]
