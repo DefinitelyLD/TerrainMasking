@@ -506,10 +506,10 @@ HLSLPROGRAM
                 float mask = tex2D(_Mask, uv).r;
                 float height = tex2D(_MainTex, uv).r;
 
-                float leftMask   =  tex2D(_Mask, float2(((uv.x * _Params.y) - _Params.z) / _Params.y, uv.y)).r;
-                float rightMask  =  tex2D(_Mask, float2(((uv.x * _Params.y) + _Params.z) / _Params.y, uv.y)).r;
-                float topMask    =  tex2D(_Mask, float2(uv.x,                                  ((uv.y * _Params.y) + _Params.z) / _Params.y)).r;
-                float bottomMask =  tex2D(_Mask, float2(uv.x,                                  ((uv.y * _Params.y) - _Params.z) / _Params.y)).r;
+                float leftMask   =  tex2D(_Mask, float2(    clamp(((uv.x * _Params.y) - _Params.z) / _Params.y, 0, 1),  clamp(uv.y, 0, 1))).r;
+                float rightMask  =  tex2D(_Mask, float2(    clamp(((uv.x * _Params.y) + _Params.z) / _Params.y, 0, 1),  clamp(uv.y, 0, 1))).r;
+                float topMask    =  tex2D(_Mask, float2(    clamp(uv.x, 0, 1),                                          clamp(((uv.y * _Params.y) + _Params.z) / _Params.y, 0, 1))).r;
+                float bottomMask =  tex2D(_Mask, float2(    clamp(uv.x, 0, 1),                                          clamp(((uv.y * _Params.y) - _Params.z) / _Params.y, 0, 1))).r;
 
                 float newHeight = _Params.x;
 
