@@ -419,7 +419,6 @@ GameObject:
   - component: {fileID: 1220939853}
   - component: {fileID: 1220939852}
   - component: {fileID: 1220939851}
-  - component: {fileID: 1220939854}
   - component: {fileID: 1220939855}
   - component: {fileID: 1220939856}
   m_Layer: 0
@@ -504,19 +503,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1220939854
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1220939849}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: feafc01c10f105647ae790de59459cef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Mask: {fileID: 2800000, guid: 85602946b883ccd4093f4e46f2f3e7f6, type: 3}
 --- !u!114 &1220939855
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -592,38 +578,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1220939849}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41e861cd5dbf035409e406390cd0ed28, type: 3}
+  m_Script: {fileID: 11500000, guid: 5d61a769a059f6c4188c6599ed0f6015, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BrushWidth: 128
-  BrushHeight: 128
-  Hardness: 42.6
-  Angle: 0
-  ActiveBrushIndex: 0
-  Frequency: 31
-  Amplitude: 0.05
-  Mode: 0
-  DotDiameter: 10
-  Radius: 0.5
-  ExpendSpeed: 0.25
-  RotateSpeed: 50
-  FlattenHeight: 1
-  PaintLayer: 0
-  DeltaTime: 0.016
-  RotationControls: 0
-  Terrain: {fileID: 1220939852}
-  RaycastCamera: {fileID: 1823688466}
-  TerrainLayers: {fileID: 11400000, guid: 9c187ded89a643e488742508d8614281, type: 2}
   Brushes: {fileID: 11400000, guid: eaf9b9ffac3785748ae9732176609857, type: 2}
-  MaskedAreaHeight: 0
-  MaskBorderSize: 2
-  BatchCount: 16
-  FrameSkipping: 0
-  HardwareAcceleration: 1
-  SyncMode: 5
-  SyncSkipping: 1
-  GizmosEnabled: 1
-  RegisterCommands: 1
+  Layers: {fileID: 11400000, guid: 9c187ded89a643e488742508d8614281, type: 2}
+  UIController: {fileID: 294061651873963210, guid: 197df4ce7d569f4429f0c6c51874b0af, type: 3}
+  Camera: {fileID: 1823688466}
+  Template: {fileID: 1220939852}
+  Mask: {fileID: 2800000, guid: 85602946b883ccd4093f4e46f2f3e7f6, type: 3}
+  Size: 36
 --- !u!1 &1323557830
 GameObject:
   m_ObjectHideFlags: 0
@@ -893,8 +857,8 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
-  orthographic: 1
+  field of view: 96.3
+  orthographic: 0
   orthographic size: 50
   m_Depth: -1
   m_CullingMask:

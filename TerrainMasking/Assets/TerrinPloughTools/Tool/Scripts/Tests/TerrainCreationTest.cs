@@ -4,6 +4,7 @@
 	* Auther: Madasir Ali - Upwork / Fiverr
 */
 
+using TerrainPloughTools;
 using UnityEngine;
 
 public class TerrainCreationTest : MonoBehaviour
@@ -14,11 +15,13 @@ public class TerrainCreationTest : MonoBehaviour
     public GameObject UIController;
     public Camera Camera;
     public Terrain Template;
+    public Texture2D Mask;
+    public int Size = 36;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        var ploughTool = TerrainPloughTools.TerrainPloughTool.Setup(Layers, Brushes, Camera, Template, 64);
+        var ploughTool = TerrainPloughTools.TerrainPloughTool.Setup(Layers, Brushes, Camera, Template, Size);
 
         // instantiating ui prefab
         var uiObj = Instantiate(UIController, ploughTool.transform.parent);
@@ -28,6 +31,11 @@ public class TerrainCreationTest : MonoBehaviour
         uiController.SetReferences(new TerrainPloughTools.PloughControlsUIController.References()
         {
             ploughTool = ploughTool
+        });
+
+        var terrainMask = Template.transform.gameObject.AddComponent<TerrainMask>();
+        terrainMask.SetReferences(new TerrainMask.References() {
+            maskTexture = Mask
         });
 
         print("Terrain Created and set up !");

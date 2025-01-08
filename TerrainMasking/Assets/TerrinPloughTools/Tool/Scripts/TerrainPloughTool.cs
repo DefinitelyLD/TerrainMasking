@@ -1554,6 +1554,7 @@ namespace TerrainPloughTools
 
             // setting terrain detail
             var terrainData = new TerrainData();
+            terrainData.enableHolesTextureCompression = false;
             terrainData.heightmapResolution = (int)Mathf.Pow(2, heightmapResolution) + 1;
             terrainData.alphamapResolution = (int)Mathf.Pow(2, alphamapResolution);
 
