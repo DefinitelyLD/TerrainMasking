@@ -5,20 +5,13 @@
 	* Description: Gives the ability to draw ploughing like procedural patterns on terrain.
 */
 
-#pragma warning disable CS0162      // disabling warnings about the unreachable CPU side (OBSOLETE) code.
-
-using TerrainPloughTools.Internal;
-
 using Debug = UnityEngine.Debug;
 using Convert = System.Convert;
-using static TerrainPloughTools.Internal.ViewAsNativeArrayExtensions;
 
 using Commands;
 using Commands.AllCommands.TerrainCommands;
 using UnityEngine;
-using Unity.Collections;
 using Unity.Mathematics;
-using Unity.Jobs;
 using System.Runtime.CompilerServices;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
@@ -176,14 +169,6 @@ namespace TerrainPloughTools
         /// Height map resolution.
         /// </summary>
         private int _heightmapResolution;
-        /// <summary>
-        /// Original height map.
-        /// </summary>
-        private float[,] _heightmap;
-        /// <summary>
-        /// Brushmap.
-        /// </summary>
-        private float[,] _brushmap;
 
         /// <summary>
         /// The angle which 'Angle' will be approaching to.
@@ -198,14 +183,6 @@ namespace TerrainPloughTools
         /// </summary>
         private int _currentSkipCount;
 
-        private JobHandle _nBrushingJobHandle;
-        private NativeArrayViewHandle _nBrushMapViewHandle;
-        private NativeArrayViewHandle _nHeightMapViewHandle;
-
-        /// <summary>
-        /// Whether a job is dispatched or not. If dispatched then not completed.
-        /// </summary>
-        private bool _jobCompleted = true;
         /// <summary>
         /// The texel position base in heightmap for which the job is dispatched.
         /// </summary>
@@ -258,14 +235,6 @@ namespace TerrainPloughTools
 
         private RenderTexture _brushmaskRescaleTexture;
         private bool _dirtyBrushmask;
-
-        private byte[] _brushmask;
-        private NativeArrayViewHandle _nBrushmaskViewHandle;
-
-        private NativeArray<float> _nBrushmapCopy;
-
-        private float[,,] _alphamap;
-        private NativeArrayViewHandle _nAlphamapViewHandle;
 
         private BrushMode _lastMode;
 
@@ -339,18 +308,13 @@ namespace TerrainPloughTools
             _stopwatch.Start();
 #endif
             // coping original height.
-            if (HardwareAcceleration) {
-                _ploughMaterial = new Material(Shader.Find(PLOUGH_SHADER));
+            _ploughMaterial = new Material(Shader.Find(PLOUGH_SHADER));
 
-                _heightmapTexture = new RenderTexture(_heightmapResolution, _heightmapResolution, 0, Terrain.heightmapFormat, 0);
+            _heightmapTexture = new RenderTexture(_heightmapResolution, _heightmapResolution, 0, Terrain.heightmapFormat, 0);
 
-                var originalRenderTexture = RenderTexture.active;
-                Graphics.Blit(Terrain.terrainData.heightmapTexture, _heightmapTexture);
-                RenderTexture.active = originalRenderTexture;
-
-            } else {
-                _heightmap = Terrain.terrainData.GetHeights(0, 0, _heightmapResolution, _heightmapResolution);
-            }
+            var originalRenderTexture = RenderTexture.active;
+            Graphics.Blit(Terrain.terrainData.heightmapTexture, _heightmapTexture);
+            RenderTexture.active = originalRenderTexture;
 
 #if LOG_ENABLED
             _stopwatch.Stop();
@@ -451,58 +415,23 @@ namespace TerrainPloughTools
 
             if (_currentSkipCount >= FrameSkipping) {
                 _currentSkipCount = 0;
-                
-                if (_jobCompleted == false) {
-                    _jobCompleted = true;
 
-                    _nBrushingJobHandle.Complete();
-
-                    if (_lastMode == BrushMode.Paint) {
-
-                        Terrain.terrainData.SetAlphamaps(_texelPos.x, _texelPos.y, _alphamap);
-
-                        _nAlphamapViewHandle.Dispose();
-
-                    } else {
-                        // apply newly calculated heights block to terrain height map.
-                        if (SyncMode == TerrainSyncMode.Forced)
-                            Terrain.terrainData.SetHeights(_texelPos.x, _texelPos.y, _brushmap);
-                        else {
-                            Terrain.terrainData.SetHeightsDelayLOD(_texelPos.x, _texelPos.y, _brushmap);
-                            _dirtyHeightmap = true;
-                        }
-
-                        _nBrushMapViewHandle.Dispose();
-                        _nHeightMapViewHandle.Dispose();
-
-                        if (_lastMode == BrushMode.Smooth) {
-                            _nBrushmapCopy.Dispose();
-                        }
-                    }
-
-                    _nBrushmaskViewHandle.Dispose();
-
-                    if (RegisterCommands && (Input.GetKey(KeyCode.Mouse0) == false))
-                    {
-                        switch (_lastMode)
-                        {
-                            case BrushMode.Paint:
-                                if (_currentAlphamapsCommand != null)
-                                {
-                                    _currentAlphamapsCommand.Complete(Terrain.terrainData);
-                                    CommandHistory.Register(_currentAlphamapsCommand);
-                                    _currentAlphamapsCommand = null;
-                                }
-                                break;
-                            default:
-                                if (_currentHeightCommand != null)
-                                {
-                                    _currentHeightCommand.Complete(Terrain.terrainData);
-                                    CommandHistory.Register(_currentHeightCommand);
-                                    _currentHeightCommand = null;
-                                }
-                                break;
-                        }
+                if (RegisterCommands && (Input.GetKey(KeyCode.Mouse0) == false)) {
+                    switch (_lastMode) {
+                        case BrushMode.Paint:
+                            if (_currentAlphamapsCommand != null) {
+                                _currentAlphamapsCommand.Complete(Terrain.terrainData);
+                                CommandHistory.Register(_currentAlphamapsCommand);
+                                _currentAlphamapsCommand = null;
+                            }
+                            break;
+                        default:
+                            if (_currentHeightCommand != null) {
+                                _currentHeightCommand.Complete(Terrain.terrainData);
+                                CommandHistory.Register(_currentHeightCommand);
+                                _currentHeightCommand = null;
+                            }
+                            break;
                     }
                 }
             } else {
@@ -558,7 +487,6 @@ namespace TerrainPloughTools
                     Graphics.Blit(Brushes.Masks[ActiveBrushIndex], _brushmaskRescaleTexture);
 
                     _brushmaskTexture.ReadPixels(new Rect(0, 0, BrushWidth, BrushHeight), 0, 0);
-                    _brushmask = _brushmaskTexture.GetRawTextureData();
 
                     RenderTexture.active = originalRenderTexture;
 
@@ -673,492 +601,277 @@ namespace TerrainPloughTools
 #if LOG_ENABLED
                 Debug.Log($"Before Job: {_stopwatch.ElapsedMilliseconds}ms");
 #endif
-                    if (HardwareAcceleration) {
 
-                        if (_renderTexture != null) {
-                            if (_renderTexture.CheckSize(size, size) == false) {
-                                _renderTexture.Release();
+                    if (_renderTexture != null) {
+                        if (_renderTexture.CheckSize(size, size) == false) {
+                            _renderTexture.Release();
 
-                                _renderTexture = new RenderTexture(size, size, 0, Terrain.heightmapFormat, 0);
-                            }
-                        } else {
                             _renderTexture = new RenderTexture(size, size, 0, Terrain.heightmapFormat, 0);
                         }
+                    } else {
+                        _renderTexture = new RenderTexture(size, size, 0, Terrain.heightmapFormat, 0);
+                    }
 
-                        if (_maskPassRenderTexture != null) {
-                            if (_maskPassRenderTexture.CheckSize(_heightmapResolution, _heightmapResolution) == false) {
-                                _maskPassRenderTexture.Release();
+                    if (_maskPassRenderTexture != null) {
+                        if (_maskPassRenderTexture.CheckSize(_heightmapResolution, _heightmapResolution) == false) {
+                            _maskPassRenderTexture.Release();
 
-                                _maskPassRenderTexture = new RenderTexture(_heightmapResolution, _heightmapResolution, 0, Terrain.heightmapFormat, 0);
-                            }
-                        } else {
                             _maskPassRenderTexture = new RenderTexture(_heightmapResolution, _heightmapResolution, 0, Terrain.heightmapFormat, 0);
                         }
+                    } else {
+                        _maskPassRenderTexture = new RenderTexture(_heightmapResolution, _heightmapResolution, 0, Terrain.heightmapFormat, 0);
+                    }
 
-                        if (_currentHeightmapTexture != null) {
-                            if (_currentHeightmapTexture.CheckSize(size, size) == false) {
-                                _currentHeightmapTexture.Release();
+                    if (_currentHeightmapTexture != null) {
+                        if (_currentHeightmapTexture.CheckSize(size, size) == false) {
+                            _currentHeightmapTexture.Release();
 
-                                _currentHeightmapTexture = new RenderTexture(size, size, 0, Terrain.heightmapFormat, 0);
-                            }
-                        } else {
                             _currentHeightmapTexture = new RenderTexture(size, size, 0, Terrain.heightmapFormat, 0);
                         }
+                    } else {
+                        _currentHeightmapTexture = new RenderTexture(size, size, 0, Terrain.heightmapFormat, 0);
+                    }
 
-                        // makking sure all data is initialized
-                        if (_ploughMaterial == null) {
-                            _ploughMaterial = new Material(Shader.Find(PLOUGH_SHADER));
-                        }
+                    // makking sure all data is initialized
+                    if (_ploughMaterial == null) {
+                        _ploughMaterial = new Material(Shader.Find(PLOUGH_SHADER));
+                    }
 
-                        if (Mode != BrushMode.Paint) {
-                            var originalRenderTexture = RenderTexture.active;
+                    if (Mode != BrushMode.Paint) {
+                        var originalRenderTexture = RenderTexture.active;
 
-                            if (_heightmapTexture != null) {
-                                if (_heightmapTexture.CheckSize(_heightmapResolution, _heightmapResolution) == false) {
+                        if (_heightmapTexture != null) {
+                            if (_heightmapTexture.CheckSize(_heightmapResolution, _heightmapResolution) == false) {
 
-                                    _heightmapTexture.Release();
-
-                                    _heightmapTexture = new RenderTexture(_heightmapResolution, _heightmapResolution, 0, Terrain.heightmapFormat, 0);
-                                    Graphics.Blit(Terrain.terrainData.heightmapTexture, _heightmapTexture);
-                                }
-                            } else {
+                                _heightmapTexture.Release();
 
                                 _heightmapTexture = new RenderTexture(_heightmapResolution, _heightmapResolution, 0, Terrain.heightmapFormat, 0);
                                 Graphics.Blit(Terrain.terrainData.heightmapTexture, _heightmapTexture);
                             }
+                        } else {
 
-                            // if paint brush reselected, recreate the base heightmap
-                            if ((Mode == BrushMode.Lines || Mode == BrushMode.Spiral || Mode == BrushMode.Curvey || Mode == BrushMode.Rings) &&
-                                (_lastMode != BrushMode.Lines && _lastMode != BrushMode.Spiral && _lastMode != BrushMode.Curvey && _lastMode != BrushMode.Rings)) {
+                            _heightmapTexture = new RenderTexture(_heightmapResolution, _heightmapResolution, 0, Terrain.heightmapFormat, 0);
+                            Graphics.Blit(Terrain.terrainData.heightmapTexture, _heightmapTexture);
+                        }
 
-                                if (_heightmapTexture != null) {
-                                    _heightmapTexture.Release();
+                        // if paint brush reselected, recreate the base heightmap
+                        if ((Mode == BrushMode.Lines || Mode == BrushMode.Spiral || Mode == BrushMode.Curvey || Mode == BrushMode.Rings) &&
+                            (_lastMode != BrushMode.Lines && _lastMode != BrushMode.Spiral && _lastMode != BrushMode.Curvey && _lastMode != BrushMode.Rings)) {
+
+                            if (_heightmapTexture != null) {
+                                _heightmapTexture.Release();
+                            }
+
+                            Graphics.Blit(Terrain.terrainData.heightmapTexture, _heightmapTexture);
+                        }
+
+                        // coping current heightmap current the brush region
+                        float normSize = size / (float)_heightmapResolution;
+                        _ploughMaterial.SetVector("_Box", new Vector4(uv.x, uv.z, normSize, Angle));
+                        Graphics.Blit(Terrain.terrainData.heightmapTexture, _currentHeightmapTexture, _ploughMaterial, 0);
+
+                        // drawing depending on specified
+                        // 
+                        float normBrushWidth;
+                        float normBrushHeight;
+                        if (Mode != BrushMode.Spiral) {
+                            normBrushWidth = BrushWidth / (float)size;
+                            normBrushHeight = BrushHeight / (float)size;
+                        } else {
+                            normBrushWidth = DotDiameter / (float)size;
+                            normBrushHeight = normBrushWidth;
+                        }
+
+                        _ploughMaterial.SetVector("_Brush", new Vector4(normBrushWidth, normBrushHeight, Frequency, Amplitude));
+                        _ploughMaterial.SetTexture("_Mask", _brushmaskRescaleTexture);
+
+                        switch (Mode) {
+                            case BrushMode.Lines: {
+                                    _ploughMaterial.SetTexture("_Basemap", _heightmapTexture);
+                                    _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
+                                    Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 1);
                                 }
+                                break;
+                            case BrushMode.Rings: {
+                                    _ploughMaterial.SetTexture("_Basemap", _heightmapTexture);
+                                    _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
+                                    Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 1);
+                                }
+                                break;
+                            case BrushMode.Curvey: {
+                                    _ploughMaterial.SetTexture("_Basemap", _heightmapTexture);
+                                    _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
+                                    Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 1);
+                                }
+                                break;
+                            case BrushMode.Spiral: {
+                                    _ploughMaterial.SetTexture("_Basemap", _heightmapTexture);
+                                    _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
+                                    Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 2);
+                                }
+                                break;
+                            case BrushMode.Rasie: {
+                                    _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
+                                    Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 6);
+                                }
+                                break;
+                            case BrushMode.Lower: {
+                                    _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
+                                    Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 7);
+                                }
+                                break;
+                            case BrushMode.Smooth: {
+                                    if (_bilinearCurrentHeightmapTexture != null) {
+                                        if (_bilinearCurrentHeightmapTexture.CheckSize(size, size) == false) {
+                                            _bilinearCurrentHeightmapTexture.Release();
 
-                                Graphics.Blit(Terrain.terrainData.heightmapTexture, _heightmapTexture);
-                            }
-
-                            // coping current heightmap current the brush region
-                            float normSize = size / (float)_heightmapResolution;
-                            _ploughMaterial.SetVector("_Box", new Vector4(uv.x, uv.z, normSize, Angle));
-                            Graphics.Blit(Terrain.terrainData.heightmapTexture, _currentHeightmapTexture, _ploughMaterial, 0);
-
-                            // drawing depending on specified
-                            // 
-                            float normBrushWidth;
-                            float normBrushHeight;
-                            if (Mode != BrushMode.Spiral) {
-                                normBrushWidth = BrushWidth / (float)size;
-                                normBrushHeight = BrushHeight / (float)size;
-                            } else {
-                                normBrushWidth = DotDiameter / (float)size;
-                                normBrushHeight = normBrushWidth;
-                            }
-
-                            _ploughMaterial.SetVector("_Brush", new Vector4(normBrushWidth, normBrushHeight, Frequency, Amplitude));
-                            _ploughMaterial.SetTexture("_Mask", _brushmaskRescaleTexture);
-
-                            switch (Mode) {
-                                case BrushMode.Lines: {
-                                        _ploughMaterial.SetTexture("_Basemap", _heightmapTexture);
-                                        _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
-                                        Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 1);
-                                    }
-                                    break;
-                                case BrushMode.Rings: {
-                                        _ploughMaterial.SetTexture("_Basemap", _heightmapTexture);
-                                        _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
-                                        Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 1);
-                                    }
-                                    break;
-                                case BrushMode.Curvey: {
-                                        _ploughMaterial.SetTexture("_Basemap", _heightmapTexture);
-                                        _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
-                                        Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 1);
-                                    }
-                                    break;
-                                case BrushMode.Spiral: {
-                                        _ploughMaterial.SetTexture("_Basemap", _heightmapTexture);
-                                        _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
-                                        Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 2);
-                                    }
-                                    break;
-                                case BrushMode.Rasie: {
-                                        _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
-                                        Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 6);
-                                    }
-                                    break;
-                                case BrushMode.Lower: {
-                                        _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
-                                        Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 7);
-                                    }
-                                    break;
-                                case BrushMode.Smooth: {
-                                        if (_bilinearCurrentHeightmapTexture != null) {
-                                            if (_bilinearCurrentHeightmapTexture.CheckSize(size, size) == false) {
-                                                _bilinearCurrentHeightmapTexture.Release();
-
-                                                _bilinearCurrentHeightmapTexture = new RenderTexture(size, size, 0, Terrain.heightmapFormat, 0);
-                                                _bilinearCurrentHeightmapTexture.filterMode = FilterMode.Bilinear;
-                                            }
-                                        } else {
                                             _bilinearCurrentHeightmapTexture = new RenderTexture(size, size, 0, Terrain.heightmapFormat, 0);
                                             _bilinearCurrentHeightmapTexture.filterMode = FilterMode.Bilinear;
                                         }
-
-                                        Graphics.Blit(_currentHeightmapTexture, _bilinearCurrentHeightmapTexture);
-
-                                        _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
-                                        _ploughMaterial.SetTexture("_Bilinear", _bilinearCurrentHeightmapTexture);
-
-                                        Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 5);
+                                    } else {
+                                        _bilinearCurrentHeightmapTexture = new RenderTexture(size, size, 0, Terrain.heightmapFormat, 0);
+                                        _bilinearCurrentHeightmapTexture.filterMode = FilterMode.Bilinear;
                                     }
-                                    break;
-                                case BrushMode.Flatten: {
-                                        _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f, (FlattenHeight / Terrain.terrainData.size.y) * 0.5f));
-                                        Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 4);
-                                    }
-                                    break;
-                                case BrushMode.Eraser: {
-                                        _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
-                                        Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 3);
-                                    }
-                                    break;
-                            }
 
-                            Vector2Int slicedSize = new Vector2Int(size, size);
-                            Vector2Int slicedPos = new Vector2Int(_texelPos.x, _texelPos.y);
-                            Vector2Int offset = new Vector2Int();
-                            if (_texelPos.x + size > textureResolution) {
-                                slicedSize.x += textureResolution - (_texelPos.x + size);
-                            }
-                            if (_texelPos.y + size > textureResolution) {
-                                slicedSize.y += textureResolution - (_texelPos.y + size);
-                            }
-                            if (_texelPos.x < 0) {
-                                offset.x += -slicedPos.x;
-                                slicedSize.x += slicedPos.x;
-                                slicedPos.x = 0;
-                            }
-                            if (_texelPos.y < 0) {
-                                offset.y += -slicedPos.y;
-                                slicedSize.y += slicedPos.y;
-                                slicedPos.y = 0;
-                            }
+                                    Graphics.Blit(_currentHeightmapTexture, _bilinearCurrentHeightmapTexture);
 
-                            // if whole of the brush is outside the terrain then nothing can be done, i.e gonna slice whole things make no sense
-                            if (((_texelPos.x + size < 0 || _texelPos.x > textureResolution) ||
-                               (_texelPos.y + size < 0 || _texelPos.y > textureResolution)) == false) {
-                                // sending the result of new calculated heightmap's brush region to the terrain.
-                                TerrainHeightmapSyncControl syncControl = TerrainHeightmapSyncControl.None;
-                                if (SyncMode == TerrainSyncMode.Forced)
-                                    syncControl = TerrainHeightmapSyncControl.HeightAndLod;
-                                else if (SyncMode == TerrainSyncMode.Partial || SyncMode == TerrainSyncMode.PartialAuto)
-                                    syncControl = TerrainHeightmapSyncControl.HeightOnly;
+                                    _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
+                                    _ploughMaterial.SetTexture("_Bilinear", _bilinearCurrentHeightmapTexture);
 
-                                Terrain.terrainData.CopyActiveRenderTextureToHeightmap(new RectInt(offset.x, offset.y, slicedSize.x, slicedSize.y), new Vector2Int(slicedPos.x, slicedPos.y), syncControl);
-                                _dirtyHeightmap = SyncMode != TerrainSyncMode.Forced && SyncMode != TerrainSyncMode.Partial;
-
-
-                                // masking 
-                                _ploughMaterial.SetTexture("_Mask", Terrain.terrainData.holesTexture);
-                                _ploughMaterial.SetVector("_Params", new Vector4((MaskedAreaHeight / Terrain.terrainData.size.y) * 0.5f, _heightmapResolution, MaskBorderSize, 0));
-                                Graphics.Blit(Terrain.terrainData.heightmapTexture, _maskPassRenderTexture, _ploughMaterial, 9);
-                                Terrain.terrainData.CopyActiveRenderTextureToHeightmap(new RectInt(0, 0, textureResolution, textureResolution), Vector2Int.zero, TerrainHeightmapSyncControl.None);
-
-                                RenderTexture.active = originalRenderTexture;
-                            }
-                        } else {
-                            var splatCount = Terrain.terrainData.alphamapTextureCount;
-                            var lastSplatUsedChannels = Terrain.terrainData.alphamapLayers % 4;
-
-                            if (_splatRenderTexture != null) {
-                                if (_splatRenderTexture.CheckSize(size, size) == false) {
-                                    _splatRenderTexture.Release();
-
-                                    _splatRenderTexture = new RenderTexture(size, size, 0, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm);
+                                    Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 5);
                                 }
-                            } else {
+                                break;
+                            case BrushMode.Flatten: {
+                                    _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f, (FlattenHeight / Terrain.terrainData.size.y) * 0.5f));
+                                    Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 4);
+                                }
+                                break;
+                            case BrushMode.Eraser: {
+                                    _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness * terrainMaxHeightMultiplier, DeltaTime, _erasing ? -1 : 1f));
+                                    Graphics.Blit(_currentHeightmapTexture, _renderTexture, _ploughMaterial, 3);
+                                }
+                                break;
+                        }
+
+                        Vector2Int slicedSize = new Vector2Int(size, size);
+                        Vector2Int slicedPos = new Vector2Int(_texelPos.x, _texelPos.y);
+                        Vector2Int offset = new Vector2Int();
+                        if (_texelPos.x + size > textureResolution) {
+                            slicedSize.x += textureResolution - (_texelPos.x + size);
+                        }
+                        if (_texelPos.y + size > textureResolution) {
+                            slicedSize.y += textureResolution - (_texelPos.y + size);
+                        }
+                        if (_texelPos.x < 0) {
+                            offset.x += -slicedPos.x;
+                            slicedSize.x += slicedPos.x;
+                            slicedPos.x = 0;
+                        }
+                        if (_texelPos.y < 0) {
+                            offset.y += -slicedPos.y;
+                            slicedSize.y += slicedPos.y;
+                            slicedPos.y = 0;
+                        }
+
+                        // if whole of the brush is outside the terrain then nothing can be done, i.e gonna slice whole things make no sense
+                        if (((_texelPos.x + size < 0 || _texelPos.x > textureResolution) ||
+                           (_texelPos.y + size < 0 || _texelPos.y > textureResolution)) == false) {
+                            // sending the result of new calculated heightmap's brush region to the terrain.
+                            TerrainHeightmapSyncControl syncControl = TerrainHeightmapSyncControl.None;
+                            if (SyncMode == TerrainSyncMode.Forced)
+                                syncControl = TerrainHeightmapSyncControl.HeightAndLod;
+                            else if (SyncMode == TerrainSyncMode.Partial || SyncMode == TerrainSyncMode.PartialAuto)
+                                syncControl = TerrainHeightmapSyncControl.HeightOnly;
+
+                            Terrain.terrainData.CopyActiveRenderTextureToHeightmap(new RectInt(offset.x, offset.y, slicedSize.x, slicedSize.y), new Vector2Int(slicedPos.x, slicedPos.y), syncControl);
+                            _dirtyHeightmap = SyncMode != TerrainSyncMode.Forced && SyncMode != TerrainSyncMode.Partial;
+
+
+                            // masking 
+                            _ploughMaterial.SetTexture("_Mask", Terrain.terrainData.holesTexture);
+                            _ploughMaterial.SetVector("_Params", new Vector4((MaskedAreaHeight / Terrain.terrainData.size.y) * 0.5f, _heightmapResolution, MaskBorderSize, 0));
+                            Graphics.Blit(Terrain.terrainData.heightmapTexture, _maskPassRenderTexture, _ploughMaterial, 9);
+                            Terrain.terrainData.CopyActiveRenderTextureToHeightmap(new RectInt(0, 0, textureResolution, textureResolution), Vector2Int.zero, TerrainHeightmapSyncControl.None);
+
+                            RenderTexture.active = originalRenderTexture;
+                        }
+                    } else {
+                        var splatCount = Terrain.terrainData.alphamapTextureCount;
+                        var lastSplatUsedChannels = Terrain.terrainData.alphamapLayers % 4;
+
+                        if (_splatRenderTexture != null) {
+                            if (_splatRenderTexture.CheckSize(size, size) == false) {
+                                _splatRenderTexture.Release();
+
                                 _splatRenderTexture = new RenderTexture(size, size, 0, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm);
                             }
+                        } else {
+                            _splatRenderTexture = new RenderTexture(size, size, 0, UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm);
+                        }
 
-                            if (_splatmapTextures != null) {
-                                if (_splatmapTextures.CheckSize(size, size) == false) {
-                                    Destroy(_splatmapTextures);
+                        if (_splatmapTextures != null) {
+                            if (_splatmapTextures.CheckSize(size, size) == false) {
+                                Destroy(_splatmapTextures);
 
-                                    _splatmapTextures = new Texture2DArray(size, size, splatCount,
-                                        UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm, UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels, 0);
-                                }
-                            } else {
                                 _splatmapTextures = new Texture2DArray(size, size, splatCount,
                                     UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm, UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels, 0);
                             }
-
-
-                            Vector2Int slicedSize = new Vector2Int(size, size);
-                            Vector2Int slicedPos = new Vector2Int(_texelPos.x, _texelPos.y);
-                            Vector2Int offset = new Vector2Int();
-                            if (_texelPos.x + size > textureResolution) {
-                                slicedSize.x += textureResolution - (_texelPos.x + size);
-                            }
-                            if (_texelPos.y + size > textureResolution) {
-                                slicedSize.y += textureResolution - (_texelPos.y + size);
-                            }
-                            if (_texelPos.x < 0) {
-                                offset.x += -slicedPos.x;
-                                slicedSize.x += slicedPos.x;
-                                slicedPos.x = 0;
-                            }
-                            if (_texelPos.y < 0) {
-                                offset.y += -slicedPos.y;
-                                slicedSize.y += slicedPos.y;
-                                slicedPos.y = 0;
-                            }
-
-
-                            float normSize = size / (float)textureResolution;
-                            for (var i = 0; i < splatCount; i++) {
-                                Graphics.CopyTexture(Terrain.terrainData.alphamapTextures[i], 0, 0, slicedPos.x, slicedPos.y, slicedSize.x, slicedSize.y, _splatmapTextures, i, 0, offset.x, offset.y);
-                            }
-
-                            var originalRenderTexture = RenderTexture.active;
-                            _ploughMaterial.SetVector("_Brush", new Vector4(BrushWidth / (float)size, BrushHeight / (float)size, 0, 0));
-                            _ploughMaterial.SetTexture("_Mask", _brushmaskRescaleTexture);
-                            _ploughMaterial.SetVector("_Box", new Vector4(uv.x, uv.z, normSize, Angle));
-                            _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness, DeltaTime, 0, 0));
-                            _ploughMaterial.SetTexture("_Splatmaps", _splatmapTextures);
-
-                            bool sync = SyncMode == TerrainSyncMode.Forced ? true : false;
-                            for (var i = 0; i < splatCount; i++) {
-
-                                {
-                                    var selectionIndex = PaintLayer % 4;
-                                    var selectionMask = new Vector4(selectionIndex == 0 ? 1 : 0, selectionIndex == 1 ? 1 : 0, selectionIndex == 2 ? 1 : 0, selectionIndex == 3 ? 1 : 0);
-                                    _ploughMaterial.SetVector("_Params", new Vector4(PaintLayer, i, i == (PaintLayer / 4) ? 1 : -1, 1f));
-                                    _ploughMaterial.SetVector("_Selection", selectionMask);
-                                    Graphics.Blit(Terrain.terrainData.alphamapTextures[i], _splatRenderTexture, _ploughMaterial, 8);
-                                }
-
-                                Terrain.terrainData.CopyActiveRenderTextureToTexture(TerrainData.AlphamapTextureName, i,
-                                    new RectInt(offset.x, offset.y, slicedSize.x, slicedSize.y), new Vector2Int(slicedPos.x, slicedPos.y), sync);
-                            }
-                            RenderTexture.active = originalRenderTexture;
-
-                            _dirtyAlphamap = !sync;
-                        }
-
-                    } 
-                    else {
-
-                        if (_texelPos.x + size >= textureResolution)
-                            _texelPos.x += textureResolution - (_texelPos.x + size);
-                        if (_texelPos.y + size >= textureResolution)
-                            _texelPos.y += textureResolution - (_texelPos.y + size);
-                        // Clamp the left side (x-axis)
-                        if (_texelPos.x < 0) {
-                            //size += _texelPos.x; // Reduce size to account for the left out-of-bounds portion
-                            _texelPos.x = 0;     // Clamp to the left edge
-                        }
-                        // Clamp the top side (y-axis)
-                        if (_texelPos.y < 0) {
-                            //size += _texelPos.y; // Reduce size to account for the top out-of-bounds portion
-                            _texelPos.y = 0;     // Clamp to the top edge
-                        }
-                        if (_texelPos.x + size >= textureResolution)
-                            size += textureResolution - (_texelPos.x + size);
-                        if (_texelPos.y + size >= textureResolution)
-                            size += textureResolution - (_texelPos.y + size);
-
-                        if (Mode != BrushMode.Paint) {
-                            // if paint brush reselected, recreate the base heightmap
-                            if ((Mode == BrushMode.Lines || Mode == BrushMode.Spiral || Mode == BrushMode.Curvey || Mode == BrushMode.Rings) &&
-                                (_lastMode != BrushMode.Lines && _lastMode != BrushMode.Spiral && _lastMode != BrushMode.Curvey && _lastMode != BrushMode.Rings)) {
-
-                                _heightmap = Terrain.terrainData.GetHeights(0, 0, _heightmapResolution, _heightmapResolution);
-                            }
-
-                            if (_heightmap == null || (_heightmap.GetLength(0) != _heightmapResolution || _heightmap.GetLength(1) != _heightmapResolution)) {
-                                _heightmap = Terrain.terrainData.GetHeights(0, 0, _heightmapResolution, _heightmapResolution);
-                            }
-
-                            // obtaining current brush map. or region of heightmap under brush influance.
-                            _brushmap = Terrain.terrainData.GetHeights(_texelPos.x, _texelPos.y, size, size);
-
-                            _nHeightMapViewHandle = _heightmap.ViewAsNativeArray(out var nHeightmap);
-                            _nBrushMapViewHandle = _brushmap.ViewAsNativeArray(out var nBrushmap);
-                            _nBrushmaskViewHandle = _brushmask.ViewAsNativeArray(out var nBrushmask);
-
-                            switch (Mode) {
-                                case BrushMode.Lines: {
-                                        _nBrushingJobHandle = new ApplyLinesBrushParrallelJob() {
-                                            brushBase = _texelPos,
-                                            nBrushMap = nBrushmap,
-                                            nHeightMap = nHeightmap,
-                                            brushmapPitch = size,
-                                            brushSize = new float2(BrushWidth, BrushHeight),
-                                            angle = Angle,
-                                            heightmapPitch = _heightmapResolution,
-                                            amplitude = Amplitude,
-                                            frequency = Frequency,
-                                            hardness = Hardness * terrainMaxHeightMultiplier,
-                                            dt = DeltaTime,
-                                            erasing = _erasing,
-                                            nBrushmask = nBrushmask
-                                        }
-                                        .Schedule(size * size, BatchCount * BatchCount);
-                                    }
-                                    break;
-                                case BrushMode.Rings: {
-                                        _nBrushingJobHandle = new ApplyLinesBrushParrallelJob() {
-                                            brushBase = _texelPos,
-                                            nBrushMap = nBrushmap,
-                                            nHeightMap = nHeightmap,
-                                            brushmapPitch = size,
-                                            brushSize = new float2(BrushWidth, BrushHeight),
-                                            angle = Angle,
-                                            heightmapPitch = _heightmapResolution,
-                                            amplitude = Amplitude,
-                                            frequency = Frequency,
-                                            hardness = Hardness * terrainMaxHeightMultiplier,
-                                            dt = DeltaTime,
-                                            erasing = _erasing,
-                                            nBrushmask = nBrushmask
-                                        }
-                                        .Schedule(size * size, BatchCount * BatchCount);
-                                    }
-                                    break;
-                                case BrushMode.Curvey: {
-                                        _nBrushingJobHandle = new ApplyLinesBrushParrallelJob() {
-                                            brushBase = _texelPos,
-                                            nBrushMap = nBrushmap,
-                                            nHeightMap = nHeightmap,
-                                            brushmapPitch = size,
-                                            brushSize = new float2(BrushWidth, BrushHeight),
-                                            angle = Angle,
-                                            heightmapPitch = _heightmapResolution,
-                                            amplitude = Amplitude,
-                                            frequency = Frequency,
-                                            hardness = Hardness * terrainMaxHeightMultiplier,
-                                            dt = DeltaTime,
-                                            erasing = _erasing,
-                                            nBrushmask = nBrushmask
-                                        }
-                                        .Schedule(size * size, BatchCount * BatchCount);
-                                    }
-                                    break;
-                                case BrushMode.Spiral: {
-                                        _nBrushingJobHandle = new ApplySpiralBrushParrallelJob() {
-                                            brushBase = _texelPos,
-                                            nBrushMap = nBrushmap,
-                                            nHeightMap = nHeightmap,
-                                            brushmapPitch = size,
-                                            heightmapPitch = _heightmapResolution,
-                                            amplitude = Amplitude,
-                                            hardness = Hardness * terrainMaxHeightMultiplier,
-                                            dt = DeltaTime,
-                                            erasing = _erasing
-                                        }
-                                        .Schedule(size * size, BatchCount * BatchCount);
-                                    }
-                                    break;
-                                case BrushMode.Rasie: {
-                                        _nBrushingJobHandle = new ApplyRaiseBrushParrallelJob() {
-                                            brushBase = _texelPos,
-                                            nBrushMap = nBrushmap,
-                                            brushmapPitch = size,
-                                            hardness = Hardness * terrainMaxHeightMultiplier * 2,
-                                            dt = DeltaTime,
-                                            angle = Angle,
-                                            brushSize = new float2(BrushWidth, BrushHeight),
-                                            nBrushmask = nBrushmask
-                                        }
-                                        .Schedule(size * size, BatchCount * BatchCount);
-                                    }
-                                    break;
-                                case BrushMode.Lower: {
-                                        _nBrushingJobHandle = new ApplyLowerBrushParrallelJob() {
-                                            brushBase = _texelPos,
-                                            nBrushMap = nBrushmap,
-                                            brushmapPitch = size,
-                                            hardness = Hardness * terrainMaxHeightMultiplier * 2,
-                                            dt = DeltaTime,
-                                            angle = Angle,
-                                            brushSize = new float2(BrushWidth, BrushHeight),
-                                            nBrushmask = nBrushmask,
-                                        }
-                                        .Schedule(size * size, BatchCount * BatchCount);
-                                    }
-                                    break;
-                                case BrushMode.Smooth: {
-                                        _nBrushmapCopy = new NativeArray<float>(nBrushmap, Allocator.TempJob);
-
-                                        _nBrushingJobHandle = new ApplySmoothBrushParrallelJob() {
-                                            brushBase = _texelPos,
-                                            nBrushMap = nBrushmap,
-                                            brushmapPitch = size,
-                                            hardness = Hardness,
-                                            dt = DeltaTime,
-                                            angle = Angle,
-                                            brushSize = new float2(BrushWidth, BrushHeight),
-                                            nBrushmask = nBrushmask,
-                                            nBrushMapCopy = _nBrushmapCopy
-                                        }
-                                        .Schedule(size * size, BatchCount * BatchCount);
-                                    }
-                                    break;
-                                case BrushMode.Flatten: {
-                                        _nBrushingJobHandle = new ApplyFlattenBrushParrallelJob() {
-                                            brushBase = _texelPos,
-                                            nBrushMap = nBrushmap,
-                                            brushmapPitch = size,
-                                            hardness = Hardness * terrainMaxHeightMultiplier * 2,
-                                            dt = DeltaTime,
-                                            angle = Angle,
-                                            brushSize = new float2(BrushWidth, BrushHeight),
-                                            nBrushmask = nBrushmask,
-                                            height = FlattenHeight / Terrain.terrainData.size.y
-                                        }
-                                        .Schedule(size * size, BatchCount * BatchCount);
-                                    }
-                                    break;
-                                case BrushMode.Eraser: {
-                                        _nBrushingJobHandle = new ApplyEraseBrushParrallelJob() {
-                                            brushBase = _texelPos,
-                                            nBrushMap = nBrushmap,
-                                            brushmapPitch = size,
-                                            hardness = Hardness * terrainMaxHeightMultiplier * 2,
-                                            dt = DeltaTime,
-                                            angle = Angle,
-                                            brushSize = new float2(BrushWidth, BrushHeight),
-                                            nBrushmask = nBrushmask,
-                                        }
-                                        .Schedule(size * size, BatchCount * BatchCount);
-                                    }
-                                    break;
-                            }
                         } else {
-                            Debug.Assert(PaintLayer <= Terrain.terrainData.alphamapLayers, $"Name: {name}," +
-                                $" {nameof(PaintLayer)}: {PaintLayer} excedes Terrain: {Terrain.name} layers ({Terrain.terrainData.alphamapLayers})");
-                            _alphamap = Terrain.terrainData.GetAlphamaps(_texelPos.x, _texelPos.y, size, size);
-                            _nAlphamapViewHandle = _alphamap.ViewAsNativeArray(out var nAlphamap);
-                            _nBrushmaskViewHandle = _brushmask.ViewAsNativeArray(out var nBrushmask);
-
-                            _nBrushingJobHandle = new ApplyPaintBrushParrallelJob() {
-                                brushBase = _texelPos,
-                                nAlphamap = nAlphamap,
-                                brushmapPitch = size,
-                                hardness = Hardness,
-                                dt = DeltaTime,
-                                angle = Angle,
-                                brushSize = new float2(BrushWidth, BrushHeight),
-                                nBrushmask = nBrushmask,
-                                alphamapSliceIndex = PaintLayer,
-                                depth = _alphamap.GetLength(2)
-                            }
-                            .Schedule(size * size * _alphamap.GetLength(2), BatchCount * BatchCount * _alphamap.GetLength(2));
+                            _splatmapTextures = new Texture2DArray(size, size, splatCount,
+                                UnityEngine.Experimental.Rendering.GraphicsFormat.R8G8B8A8_UNorm, UnityEngine.Experimental.Rendering.TextureCreationFlags.DontInitializePixels, 0);
                         }
 
-                        _jobCompleted = false;
+
+                        Vector2Int slicedSize = new Vector2Int(size, size);
+                        Vector2Int slicedPos = new Vector2Int(_texelPos.x, _texelPos.y);
+                        Vector2Int offset = new Vector2Int();
+                        if (_texelPos.x + size > textureResolution) {
+                            slicedSize.x += textureResolution - (_texelPos.x + size);
+                        }
+                        if (_texelPos.y + size > textureResolution) {
+                            slicedSize.y += textureResolution - (_texelPos.y + size);
+                        }
+                        if (_texelPos.x < 0) {
+                            offset.x += -slicedPos.x;
+                            slicedSize.x += slicedPos.x;
+                            slicedPos.x = 0;
+                        }
+                        if (_texelPos.y < 0) {
+                            offset.y += -slicedPos.y;
+                            slicedSize.y += slicedPos.y;
+                            slicedPos.y = 0;
+                        }
+
+
+                        float normSize = size / (float)textureResolution;
+                        for (var i = 0; i < splatCount; i++) {
+                            Graphics.CopyTexture(Terrain.terrainData.alphamapTextures[i], 0, 0, slicedPos.x, slicedPos.y, slicedSize.x, slicedSize.y, _splatmapTextures, i, 0, offset.x, offset.y);
+                        }
+
+                        var originalRenderTexture = RenderTexture.active;
+                        _ploughMaterial.SetVector("_Brush", new Vector4(BrushWidth / (float)size, BrushHeight / (float)size, 0, 0));
+                        _ploughMaterial.SetTexture("_Mask", _brushmaskRescaleTexture);
+                        _ploughMaterial.SetVector("_Box", new Vector4(uv.x, uv.z, normSize, Angle));
+                        _ploughMaterial.SetVector("_Hardness", new Vector4(Hardness, DeltaTime, 0, 0));
+                        _ploughMaterial.SetTexture("_Splatmaps", _splatmapTextures);
+
+                        bool sync = SyncMode == TerrainSyncMode.Forced ? true : false;
+                        for (var i = 0; i < splatCount; i++) {
+
+                            {
+                                var selectionIndex = PaintLayer % 4;
+                                var selectionMask = new Vector4(selectionIndex == 0 ? 1 : 0, selectionIndex == 1 ? 1 : 0, selectionIndex == 2 ? 1 : 0, selectionIndex == 3 ? 1 : 0);
+                                _ploughMaterial.SetVector("_Params", new Vector4(PaintLayer, i, i == (PaintLayer / 4) ? 1 : -1, 1f));
+                                _ploughMaterial.SetVector("_Selection", selectionMask);
+                                Graphics.Blit(Terrain.terrainData.alphamapTextures[i], _splatRenderTexture, _ploughMaterial, 8);
+                            }
+
+                            Terrain.terrainData.CopyActiveRenderTextureToTexture(TerrainData.AlphamapTextureName, i,
+                                new RectInt(offset.x, offset.y, slicedSize.x, slicedSize.y), new Vector2Int(slicedPos.x, slicedPos.y), sync);
+                        }
+                        RenderTexture.active = originalRenderTexture;
+
+                        _dirtyAlphamap = !sync;
                     }
 
                     _lastMode = Mode;
@@ -1270,29 +983,6 @@ namespace TerrainPloughTools
             // clamping in max bounds of heightmap.
             var size = Mode == BrushMode.Spiral ? DotDiameter : realBrushSize;
 
-            if(HardwareAcceleration == false)
-            {
-                if (texelPos.x + size >= textureResolution)
-                    texelPos.x += textureResolution - (texelPos.x + size);
-                if (texelPos.y + size >= textureResolution)
-                    texelPos.y += textureResolution - (texelPos.y + size);
-                // Clamp the left side (x-axis)
-                if (texelPos.x < 0) {
-                    //size += _texelPos.x; // Reduce size to account for the left out-of-bounds portion
-                    texelPos.x = 0;     // Clamp to the left edge
-                }
-
-                // Clamp the top side (y-axis)
-                if (texelPos.y < 0) {
-                    //size += _texelPos.y; // Reduce size to account for the top out-of-bounds portion
-                    texelPos.y = 0;     // Clamp to the top edge
-                }
-                if (texelPos.x + size >= textureResolution)
-                    size += textureResolution - (texelPos.x + size);
-                if (texelPos.y + size >= textureResolution)
-                    size += textureResolution - (texelPos.y + size);
-            }
-
             // CRITICAL CODE:-
             if (HardwareAcceleration) {
                 uv = (texelPos.x / (float)textureResolution, texelPos.y / (float)textureResolution);
@@ -1323,9 +1013,6 @@ namespace TerrainPloughTools
         }
 
         private void OnDestroy() {
-
-            HardSyncJobs();
-
             _currentHeightCommand?.DestroyCommand();
             _currentAlphamapsCommand?.DestroyCommand();
 
@@ -1361,26 +1048,6 @@ namespace TerrainPloughTools
 
             if (_splatRenderTexture != null)
                 _splatRenderTexture.Release();
-        }
-
-        private void HardSyncJobs() {
-            if (_jobCompleted == false) {
-                _jobCompleted = true;
-
-                _nBrushingJobHandle.Complete();
-
-                if (_lastMode == BrushMode.Paint) {
-                    _nAlphamapViewHandle.Dispose();
-                } else {
-                    _nBrushMapViewHandle.Dispose();
-                    _nHeightMapViewHandle.Dispose();
-
-                    if (_lastMode == BrushMode.Smooth) {
-                        _nBrushmapCopy.Dispose();
-                    }
-                }
-                _nBrushmaskViewHandle.Dispose();
-            }
         }
 
         // Function to generate a grid mesh with fixed total width and height of 1
@@ -1712,9 +1379,6 @@ namespace TerrainPloughTools
             _saveLoadSystem.Save(Terrain, fileName);
         }
         public void Load(string fileName) {
-
-            HardSyncJobs();
-
             Terrain.terrainData.SyncHeightmap();
             Terrain.terrainData.SyncTexture(TerrainData.AlphamapTextureName);
             _dirtyHeightmap = false;
@@ -1728,9 +1392,6 @@ namespace TerrainPloughTools
                 _heightmapTexture.Release();
                 _heightmapTexture = null;
             }
-            if (_heightmap != null)
-                _heightmap = null;
-
             _saveLoadSystem.Load(fileName, Terrain);
         }
         public string[] QuerySaveFiles() {
@@ -1742,5 +1403,3 @@ namespace TerrainPloughTools
         public sealed class DebugInfoAttribute : Attribute {}
     }
 }
-
-#pragma warning restore CS0162
