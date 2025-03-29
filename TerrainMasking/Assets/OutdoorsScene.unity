@@ -480,11 +480,11 @@ Terrain:
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1
   m_ReceiveGI: 1
-  m_ScaleInLightmap: 0.0256
+  m_ScaleInLightmap: 1
   m_LightmapParameters: {fileID: 15203, guid: 0000000000000000f000000000000000, type: 0}
   m_GroupingID: 0
   m_RenderingLayerMask: 1
-  m_AllowAutoConnect: 1
+  m_AllowAutoConnect: 0
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
   m_TreeMotionVectorModeOverride: 3
@@ -524,7 +524,7 @@ MonoBehaviour:
     terrainControl02: {fileID: 0}
     terrainControl03: {fileID: 0}
     terrainControl04: {fileID: 0}
-    terrainHolesMask: {fileID: 2800000, guid: 85602946b883ccd4093f4e46f2f3e7f6, type: 3}
+    terrainHolesMask: {fileID: 2800000, guid: 96673db1e75dfef4f823437b09af2597, type: 3}
     useLayersOrderAsID: 0
     terrainLayers:
     - name: DemoTerrainGrassLayer
@@ -586,8 +586,8 @@ MonoBehaviour:
   UIController: {fileID: 294061651873963210, guid: 197df4ce7d569f4429f0c6c51874b0af, type: 3}
   Camera: {fileID: 1823688466}
   Template: {fileID: 1220939852}
-  Mask: {fileID: 2800000, guid: 85602946b883ccd4093f4e46f2f3e7f6, type: 3}
-  Size: 36
+  Mask: {fileID: 2800000, guid: 96673db1e75dfef4f823437b09af2597, type: 3}
+  Size: 72
 --- !u!1 &1323557830
 GameObject:
   m_ObjectHideFlags: 0
@@ -884,7 +884,7 @@ Transform:
   m_GameObject: {fileID: 1823688464}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 18, y: 30, z: 18}
+  m_LocalPosition: {x: 36, y: 30, z: 36}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1782,7 +1782,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!1 &6227685570709373054
 GameObject:
   m_ObjectHideFlags: 0
@@ -2115,7 +2115,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

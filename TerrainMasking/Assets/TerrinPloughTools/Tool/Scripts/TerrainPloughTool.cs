@@ -5,6 +5,8 @@
 	* Description: Gives the ability to draw ploughing like procedural patterns on terrain.
 */
 
+#pragma warning disable CS0162      // disabling warnings about the unreachable CPU side (OBSOLETE) code.
+
 using TerrainPloughTools.Internal;
 
 using Debug = UnityEngine.Debug;
@@ -297,6 +299,8 @@ namespace TerrainPloughTools
         /// For Spiral Subdvisions
         /// </summary>
         private float _lastAngle;
+
+        private const float DESIRED_SPIRAL_ARC = 0.1f;
 
 #if LOG_ENABLED
         private Stopwatch _stopwatch = new ();
@@ -619,15 +623,17 @@ namespace TerrainPloughTools
                             Mathf.Sqrt(Mathf.Pow(BrushWidth, 2) + Mathf.Pow(BrushHeight, 2)));
 
 
-            int subDivs = 1;
-            // if spiral divide it into parts if the arc, that will be draw is grater then dot,
+            int subDivs = 1;                // currenly only being used for spiral
+            // if spiral divide it into parts if the arc, that will be draw is grater then desired arc,
             // else it will not be able to cover the whole arc and create a gap.
             if (Mode == BrushMode.Spiral) {
                 float arc = Radius * (Mathf.Deg2Rad * (Angle - _lastAngle));
-                if (arc > (DotDiameter * 0.5f)) {
-                    subDivs = (int)(arc / (DotDiameter * 0.5f)) + 1;
+
+                if(arc > DESIRED_SPIRAL_ARC) {
+                    subDivs = (int)(arc / DESIRED_SPIRAL_ARC) + 1;
                 }
             }
+
             for (int div = 0; div < subDivs; div++) {
                 // converting click position in world space to texel space of the heightmap.
                 var terrainPos = _hit.point - Terrain.transform.position;
@@ -1735,3 +1741,5 @@ namespace TerrainPloughTools
         public sealed class DebugInfoAttribute : Attribute {}
     }
 }
+
+#pragma warning restore CS0162
