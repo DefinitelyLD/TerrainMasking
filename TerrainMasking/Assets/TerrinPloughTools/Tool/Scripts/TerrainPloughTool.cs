@@ -133,8 +133,8 @@ namespace TerrainPloughTools
 
         [Header("Perfomance Settings:")]
         [Tooltip("The dimension of tiles in which to divide the brush. Only for CPU based.")]
-        [SerializeField]
-        private int BatchCount = 16;
+        //[SerializeField]      // CPU SIDE OBSOLETE !
+        private const int BatchCount = 16;
         [Tooltip("How many frames to give the job to finish. For both CPU based and GPU based.")]
         [SerializeField]
         [Range(0, 3)]
@@ -167,6 +167,9 @@ namespace TerrainPloughTools
         [Tooltip("To register commands in Command Histroy.")]
         [SerializeField]
         private bool RegisterCommands = true;
+        [Tooltip("If true the cursor will not move while drawing spiral and ring.")]
+        [SerializeField]
+        private bool AllowSpiralRingCursorLock = true;
         //      //
 
         /// <summary>
@@ -585,7 +588,9 @@ namespace TerrainPloughTools
 
             var ray = RaycastCamera.ScreenPointToRay(Input.mousePosition);
             // if spiral use the first click position
-            if (Mode == BrushMode.Spiral) {
+            if ((Mode == BrushMode.Spiral || Mode == BrushMode.Rings) &&
+                AllowSpiralRingCursorLock) {
+
                 if (Input.GetKeyDown(KeyCode.Mouse0)) {
                     if (Physics.Raycast(ray, out _hit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
                         return;
@@ -626,18 +631,15 @@ namespace TerrainPloughTools
             // else it will not be able to cover the whole arc and create a gap.
             if (Mode == BrushMode.Spiral) {
                 float arc = Radius * (Mathf.Deg2Rad * (Angle - _lastAngle));
-
-                if(arc > DESIRED_SPIRAL_ARC) {
-                    subDivs = (int)(arc / DESIRED_SPIRAL_ARC) + 1;
-                }
+                subDivs = (int)(arc / DESIRED_SPIRAL_ARC) + 1;
             }
 
             for (int div = 0; div < subDivs; div++) {
+
                 // converting click position in world space to texel space of the heightmap.
                 var terrainPos = _hit.point - Terrain.transform.position;
                 if (Mode == BrushMode.Spiral) {
                     float angle = _lastAngle + ((Angle - _lastAngle) * (1f / (float)((subDivs - div))));
-                    //print($"Iteration: {iteraion}, Complete Angle: {Angle}, Part Angle: {angle}");
                     var dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0, Mathf.Sin(angle * Mathf.Deg2Rad));
 
                     terrainPos += dir * Radius;
@@ -1224,7 +1226,8 @@ namespace TerrainPloughTools
             var ray = RaycastCamera.ScreenPointToRay(Input.mousePosition);
 
             // for spiral just have centre at the click position
-            if(Mode == BrushMode.Spiral) {
+            if((Mode == BrushMode.Spiral || Mode == BrushMode.Rings) &&
+                AllowSpiralRingCursorLock) {
                 if (Input.GetKeyDown(KeyCode.Mouse0)) {
                     if (Physics.Raycast(ray, out _hologramHit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
                         return;
