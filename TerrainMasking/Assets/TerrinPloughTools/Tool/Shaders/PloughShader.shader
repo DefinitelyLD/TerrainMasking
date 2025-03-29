@@ -138,12 +138,12 @@ HLSLPROGRAM
                 if(_Hardness.z < 0.0)
                 {
                     float followHeight = lerp(currentHeight + baseHeight, baseHeight, _Hardness.x * _Hardness.y * 2 * mask);
-                    return clamp(followHeight, 0, 0.5);
+                    return clamp(followHeight, baseHeight, 0.5);
                 }
                 else
                 {
                     float followHeight = lerp(currentHeight, newHeight, _Hardness.x * _Hardness.y * mask);
-                    return clamp((followHeight) + baseHeight, 0, 0.5);
+                    return clamp((followHeight) + baseHeight, baseHeight, 0.5);
                 }
             }
 ENDHLSL
