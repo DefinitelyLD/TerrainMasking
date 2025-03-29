@@ -23,8 +23,6 @@ using System.Runtime.CompilerServices;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using System;
-using UnityEngine.UIElements;
-using Codice.Client.BaseCommands.Differences;
 
 namespace TerrainPloughTools
 {
