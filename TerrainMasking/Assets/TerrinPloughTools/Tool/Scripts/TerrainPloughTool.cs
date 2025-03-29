@@ -285,6 +285,12 @@ namespace TerrainPloughTools
 
         private RenderTexture _maskPassRenderTexture;
 
+        /// <summary>
+        /// Storing hit of last frame, useful when cursor is moving during spiral to not allow pos change.
+        /// </summary>
+        private RaycastHit _hit;
+        private RaycastHit _hologramHit;
+
 #if LOG_ENABLED
         private Stopwatch _stopwatch = new ();
         private long _elaspedTime;
@@ -569,8 +575,17 @@ namespace TerrainPloughTools
             }
 
             var ray = RaycastCamera.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
-                return;
+            // if spiral use the first click position
+            if (Mode == BrushMode.Spiral) {
+                if (Input.GetKeyDown(KeyCode.Mouse0)) {
+                    if (Physics.Raycast(ray, out _hit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
+                        return;
+                }
+            } else {
+                // for other brushes follow the cursor
+                if (Physics.Raycast(ray, out _hit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
+                    return;
+            }
             if (EventSystem.current.IsPointerOverGameObject())
                 return;
 
@@ -597,7 +612,7 @@ namespace TerrainPloughTools
                             Mathf.Sqrt(Mathf.Pow(BrushWidth, 2) + Mathf.Pow(BrushHeight, 2)));
 
             // converting click position in world space to texel space of the heightmap.
-            var terrainPos = hit.point - Terrain.transform.position;
+            var terrainPos = _hit.point - Terrain.transform.position;
             if(Mode == BrushMode.Spiral) {
                 var dir = new Vector3(Mathf.Cos(Angle * Mathf.Deg2Rad), 0, Mathf.Sin(Angle * Mathf.Deg2Rad));
                 terrainPos += dir * Radius;
@@ -1198,15 +1213,31 @@ namespace TerrainPloughTools
                 return;
 
             var ray = RaycastCamera.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
-                return;
+
+            // for spiral just have centre at the click position
+            if(Mode == BrushMode.Spiral) {
+                if (Input.GetKeyDown(KeyCode.Mouse0)) {
+                    if (Physics.Raycast(ray, out _hologramHit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
+                        return;
+                    
+                } else if (Input.GetKey(KeyCode.Mouse0) == false) {
+                    // if the did not even started drawing
+                    if (Physics.Raycast(ray, out _hologramHit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
+                        return;
+                }
+                
+            } else {
+                // if the did not even started drawing
+                if (Physics.Raycast(ray, out _hologramHit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
+                    return;
+            }
 
             // calculating a large square around brush rectangle to accomodate rotation.
             var realBrushSize = Convert.ToInt32(
                              Mathf.Sqrt(Mathf.Pow(BrushWidth, 2) + Mathf.Pow(BrushHeight, 2)));
 
             // converting click position in world space to texel space of the heightmap.
-            var terrainPos = hit.point - Terrain.transform.position;
+            var terrainPos = _hologramHit.point - Terrain.transform.position;
             if (Mode == BrushMode.Spiral) {
                 var dir = new Vector3(Mathf.Cos(Angle * Mathf.Deg2Rad), 0, Mathf.Sin(Angle * Mathf.Deg2Rad));
                 terrainPos += dir * Radius;
