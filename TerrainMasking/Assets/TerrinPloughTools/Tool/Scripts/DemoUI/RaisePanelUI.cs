@@ -40,7 +40,7 @@ namespace TerrainPloughTools
         public override void Set(ref TerrainPloughTool.MutationData data, TerrainPloughTool.MutationData state) {
             data.brushIndex = BrushSelection.SelectedIndex;
             data.hardness = Hardness.value;
-            data.angle = Angle.value;
+            data.angle = 360f - Angle.value;
 
             int width;
             int height;

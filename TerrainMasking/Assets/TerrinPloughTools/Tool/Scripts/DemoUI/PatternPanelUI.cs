@@ -46,7 +46,7 @@ namespace TerrainPloughTools
             data.frequency = Frequency.value;
             data.brushIndex = BrushSelection.SelectedIndex;
             data.hardness = Hardness.value;
-            data.angle = Angle.value;
+            data.angle = 360f - Angle.value;
 
             int width;
             int height;
