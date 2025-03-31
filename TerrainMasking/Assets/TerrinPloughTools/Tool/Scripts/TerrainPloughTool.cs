@@ -24,8 +24,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using System;
 
-namespace TerrainPloughTools
-{
+namespace TerrainPloughTools {
     /// <summary>
     /// Terrain Plough Tools (MonoBehaviour). Master script to schedule jobs and handle input or to optionally draw gizmos.
     /// </summary>
@@ -40,50 +39,62 @@ namespace TerrainPloughTools
         }
 
         #region FEILDS
-        
+
         [Header("Brush Settings:")]
 
         [Tooltip("The width of the plough brush in texels related to terrain's height map.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private int BrushWidth = 64;
         [Tooltip("The height of the plough brush in texels related to terrain's height map.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private int BrushHeight = 64;
         [Tooltip("Less the value more time to hold at a position to reach the max altitude. High value = less smoothess in elevation.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private float Hardness = 10;
         [Tooltip("The current angle of the brush.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private float Angle;
         [Tooltip("The index of the brush to use from brushmasks set.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private int ActiveBrushIndex;
 
         [Header("Pattern Settings:")]
         [Tooltip("The sum of the total crests and troughs form or fit in brush size.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private float Frequency = 31;
         [Tooltip("The height to wave in world's position or scale.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private float Amplitude = 0.005f;
 
         [Header("Mode:")]
         [Tooltip("Brush behaviour.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private BrushMode Mode = BrushMode.Lines;
 
         [Header("Spiral Settings:")]
         [Tooltip("Width or thichness of the line creating spiral. Like a marbel carving in sand, its the diameter of that marbel.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private int DotDiameter = 10;
         [Tooltip("Starting radius or distance from centre the marbel or the dot is, during making spirals.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private float Radius = 0.5f;
         [Tooltip("The speed by which the spiral will move outward, or the speed of the radius to increase.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private float ExpendSpeed = 0.25f;
         [Tooltip("The rotation speed or speed to increase the angle of the brush, the speed of carving spiral. High values can create cuts in spirals !")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private float RotateSpeed = 50f;
 
         [Header("Curvey Settings:")]
@@ -93,12 +104,14 @@ namespace TerrainPloughTools
 
         [Header("Flatten Settings: ")]
         [Tooltip("The max world height to reach.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private float FlattenHeight = 1f;
 
         [Header("Paint Settings:")]
         [Tooltip("The index of the layer to paint in Terrain Layers Set.")]
-        [SerializeField] [DebugInfoAttribute]
+        [SerializeField]
+        [DebugInfoAttribute]
         private int PaintLayer;
 
         [Header("Misc:")]
@@ -223,10 +236,10 @@ namespace TerrainPloughTools
         /// </summary>
         private RenderTexture _renderTexture;
 
-/*        /// <summary>
-        /// The brush bounding box from last frame.
-        /// </summary>
-        private int _lastFrameSize;*/
+        /*        /// <summary>
+                /// The brush bounding box from last frame.
+                /// </summary>
+                private int _lastFrameSize;*/
 
         /// <summary>
         /// The material being used for ploughing, GPU based.
@@ -300,7 +313,11 @@ namespace TerrainPloughTools
         /// For Spiral Subdvisions
         /// </summary>
         private float _lastAngle;
+        private float _lastRadius;
 
+        /// <summary>
+        /// Decreasing it will increase spiral resolution, but will take perfomance.
+        /// </summary>
         private const float DESIRED_SPIRAL_ARC = 0.1f;
 
 #if LOG_ENABLED
@@ -318,10 +335,10 @@ namespace TerrainPloughTools
         }
 
         private void Start() {
-            Debug.Assert(Terrain        != null, $"{name}:{nameof(TerrainPloughTool)}, variable {nameof(Terrain)} is not assigned.");
-            Debug.Assert(RaycastCamera  != null, $"{name}:{nameof(TerrainPloughTool)}, variable {nameof(RaycastCamera)} is not assigned.");
-            Debug.Assert(TerrainLayers  != null, $"{name}:{nameof(TerrainLayersSet)}, variable {nameof(TerrainLayers)} is not assigned.");
-            Debug.Assert(Brushes        != null, $"{name}:{nameof(BrushmasksSet)}, variable {nameof(Brushes)} is not assigned.");
+            Debug.Assert(Terrain != null, $"{name}:{nameof(TerrainPloughTool)}, variable {nameof(Terrain)} is not assigned.");
+            Debug.Assert(RaycastCamera != null, $"{name}:{nameof(TerrainPloughTool)}, variable {nameof(RaycastCamera)} is not assigned.");
+            Debug.Assert(TerrainLayers != null, $"{name}:{nameof(TerrainLayersSet)}, variable {nameof(TerrainLayers)} is not assigned.");
+            Debug.Assert(Brushes != null, $"{name}:{nameof(BrushmasksSet)}, variable {nameof(Brushes)} is not assigned.");
             Debug.Assert(EventSystem.current != null, "There is no event system in scene, Create a event system by right click inside heirarchy then in UI menu.");
 
             _currentSkipCount = FrameSkipping;
@@ -380,8 +397,7 @@ namespace TerrainPloughTools
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void AlphamapsHardSync()
-            {
+            void AlphamapsHardSync() {
 #if LOG_ENABLED
                 _stopwatch.Start();
 #endif
@@ -400,8 +416,7 @@ namespace TerrainPloughTools
                     _dirtyHeightmap = false;
                     HeightmapHardSync();
                 }
-                if (_dirtyAlphamap && (SyncMode == TerrainSyncMode.Auto || SyncMode == TerrainSyncMode.PartialAuto))
-                {
+                if (_dirtyAlphamap && (SyncMode == TerrainSyncMode.Auto || SyncMode == TerrainSyncMode.PartialAuto)) {
                     _dirtyAlphamap = false;
                     AlphamapsHardSync();
                 }
@@ -419,27 +434,22 @@ namespace TerrainPloughTools
                     HeightmapHardSync();
                 }
 
-                if (_dirtyAlphamap && SyncMode == TerrainSyncMode.AfterClick)
-                {
+                if (_dirtyAlphamap && SyncMode == TerrainSyncMode.AfterClick) {
                     _dirtyAlphamap = false;
                     AlphamapsHardSync();
                 }
 
-                if (RegisterCommands && willSync)
-                {
-                    switch (_lastMode)
-                    {
+                if (RegisterCommands && willSync) {
+                    switch (_lastMode) {
                         case BrushMode.Paint:
-                            if(_currentAlphamapsCommand != null)
-                            {
+                            if (_currentAlphamapsCommand != null) {
                                 _currentAlphamapsCommand.Complete(Terrain.terrainData);
                                 CommandHistory.Register(_currentAlphamapsCommand);
                                 _currentAlphamapsCommand = null;
                             }
                             break;
                         default:
-                            if (_currentHeightCommand != null)
-                            {
+                            if (_currentHeightCommand != null) {
                                 _currentHeightCommand.Complete(Terrain.terrainData);
                                 CommandHistory.Register(_currentHeightCommand);
                                 _currentHeightCommand = null;
@@ -451,7 +461,7 @@ namespace TerrainPloughTools
 
             if (_currentSkipCount >= FrameSkipping) {
                 _currentSkipCount = 0;
-                
+
                 if (_jobCompleted == false) {
                     _jobCompleted = true;
 
@@ -482,21 +492,17 @@ namespace TerrainPloughTools
 
                     _nBrushmaskViewHandle.Dispose();
 
-                    if (RegisterCommands && (Input.GetKey(KeyCode.Mouse0) == false))
-                    {
-                        switch (_lastMode)
-                        {
+                    if (RegisterCommands && (Input.GetKey(KeyCode.Mouse0) == false)) {
+                        switch (_lastMode) {
                             case BrushMode.Paint:
-                                if (_currentAlphamapsCommand != null)
-                                {
+                                if (_currentAlphamapsCommand != null) {
                                     _currentAlphamapsCommand.Complete(Terrain.terrainData);
                                     CommandHistory.Register(_currentAlphamapsCommand);
                                     _currentAlphamapsCommand = null;
                                 }
                                 break;
                             default:
-                                if (_currentHeightCommand != null)
-                                {
+                                if (_currentHeightCommand != null) {
                                     _currentHeightCommand.Complete(Terrain.terrainData);
                                     CommandHistory.Register(_currentHeightCommand);
                                     _currentHeightCommand = null;
@@ -511,8 +517,8 @@ namespace TerrainPloughTools
             }
 
             {
-                if(_brushmaskTexture != null) {
-                    if(_brushmaskTexture.CheckSize(BrushWidth, BrushHeight) == false) {
+                if (_brushmaskTexture != null) {
+                    if (_brushmaskTexture.CheckSize(BrushWidth, BrushHeight) == false) {
                         _dirtyBrushmask = true;
 
                         // resize
@@ -526,9 +532,7 @@ namespace TerrainPloughTools
                         var size = Convert.ToInt32(Mathf.Sqrt(Mathf.Pow(BrushWidth, 2) + Mathf.Pow(BrushHeight, 2)));
                         _brushPreviewMesh = GenerateGrid(Mathf.Min(size, MAX_BRUSH_PREVIEW_GRID_RESOLUTION));
                     }
-                }
-                else
-                {
+                } else {
                     _dirtyBrushmask = true;
 
                     // create new
@@ -541,13 +545,11 @@ namespace TerrainPloughTools
                 }
 
                 // if brush changed
-                if (_lastBrushIndex != ActiveBrushIndex)
-                {
+                if (_lastBrushIndex != ActiveBrushIndex) {
                     _dirtyBrushmask = true;
                 }
                 // rescales selected brush
-                if (_dirtyBrushmask)
-                {
+                if (_dirtyBrushmask) {
                     _dirtyBrushmask = false;
 #if LOG_ENABLED
                     _stopwatch.Start();
@@ -572,14 +574,11 @@ namespace TerrainPloughTools
                 _lastBrushIndex = ActiveBrushIndex;
             }
 
-            if (Input.GetKey(KeyCode.Mouse0) == false)
-            {
-                if(_currentHeightCommand != null)
-                {
+            if (Input.GetKey(KeyCode.Mouse0) == false) {
+                if (_currentHeightCommand != null) {
                     _currentHeightCommand.DestroyCommand();
                 }
-                if(_currentAlphamapsCommand != null)
-                {
+                if (_currentAlphamapsCommand != null) {
                     _currentAlphamapsCommand.DestroyCommand();
                 }
 
@@ -606,17 +605,12 @@ namespace TerrainPloughTools
 #if LOG_ENABLED
             _stopwatch.Start();
 #endif
-            if (Mode == BrushMode.Paint)
-            {
-                if (_currentAlphamapsCommand == null)
-                {
+            if (Mode == BrushMode.Paint) {
+                if (_currentAlphamapsCommand == null) {
                     _currentAlphamapsCommand = new ModifySplatsCommand(Terrain.terrainData);
                 }
-            }
-            else
-            {
-                if (_currentHeightCommand == null)
-                {
+            } else {
+                if (_currentHeightCommand == null) {
                     _currentHeightCommand = new ModifyHeightsCommand(Terrain.terrainData);
                 }
             }
@@ -631,18 +625,19 @@ namespace TerrainPloughTools
             // else it will not be able to cover the whole arc and create a gap.
             if (Mode == BrushMode.Spiral) {
                 float arc = Radius * (Mathf.Deg2Rad * (Angle - _lastAngle));
+
                 subDivs = (int)(arc / DESIRED_SPIRAL_ARC) + 1;
             }
-
             for (int div = 0; div < subDivs; div++) {
 
                 // converting click position in world space to texel space of the heightmap.
                 var terrainPos = _hit.point - Terrain.transform.position;
                 if (Mode == BrushMode.Spiral) {
-                    float angle = _lastAngle + ((Angle - _lastAngle) * (1f / (float)((subDivs - div))));
-                    var dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0, Mathf.Sin(angle * Mathf.Deg2Rad));
+                    float angle = Mathf.LerpAngle(_lastAngle, Angle, div / (float)subDivs);
+                    float radius = Mathf.Lerp(_lastRadius, Radius, div / (float)subDivs);
 
-                    terrainPos += dir * Radius;
+                    var dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), 0, Mathf.Sin(angle * Mathf.Deg2Rad));
+                    terrainPos += dir * radius;
                 }
 
                 var uv = (terrainPos.x, terrainPos.z);
@@ -947,8 +942,7 @@ namespace TerrainPloughTools
                             _dirtyAlphamap = !sync;
                         }
 
-                    } 
-                    else {
+                    } else {
 
                         if (_texelPos.x + size >= textureResolution)
                             _texelPos.x += textureResolution - (_texelPos.x + size);
@@ -1177,14 +1171,18 @@ namespace TerrainPloughTools
             // ________________________ Handling contols or inputs ___________________________//
             _erasing = Input.GetKey(KeyCode.Mouse1);
             _lastAngle = Angle;
+            _lastRadius = Radius;
 
             if (Input.GetKey(KeyCode.Mouse0)) {
                 if (Mode == BrushMode.Spiral || Mode == BrushMode.Rings) {
-                    if(_copiedOrignalRadius < 0) {
+                    if (_copiedOrignalRadius < 0) {
                         _copiedOrignalRadius = Radius;
                     }
                     Angle += DeltaTime * RotateSpeed;
                     Radius += DeltaTime * ExpendSpeed;
+
+                    // if uncommented creating a small dent, on 360 degree. if not floating point accuracy goes bad with large spirals.
+                    //Angle = Mathf.Repeat(Angle, 360f);
                 } else if (Mode == BrushMode.Curvey) {
                     var mousePos = Input.mousePosition;
                     var delta = new Vector2(mousePos.x - _lastMousePosition.x, mousePos.y - _lastMousePosition.y);
@@ -1194,8 +1192,8 @@ namespace TerrainPloughTools
                     }
                 }
             }
-            if(Input.GetKeyUp(KeyCode.Mouse0)) {
-                if(Mode == BrushMode.Spiral || Mode == BrushMode.Rings) {
+            if (Input.GetKeyUp(KeyCode.Mouse0)) {
+                if (Mode == BrushMode.Spiral || Mode == BrushMode.Rings) {
                     Radius = _copiedOrignalRadius;
                     Angle = 0;
                     _copiedOrignalRadius = -1;
@@ -1210,7 +1208,7 @@ namespace TerrainPloughTools
                 }
             }
 
-            if (Mode == BrushMode.Curvey || RotationControls) { 
+            if (Mode == BrushMode.Curvey || RotationControls) {
                 Angle = Mathf.LerpAngle(Angle, _newAngle, DeltaTime * RotateSpeed);
                 _lastMousePosition = Input.mousePosition;
             }
@@ -1226,18 +1224,18 @@ namespace TerrainPloughTools
             var ray = RaycastCamera.ScreenPointToRay(Input.mousePosition);
 
             // for spiral just have centre at the click position
-            if((Mode == BrushMode.Spiral || Mode == BrushMode.Rings) &&
+            if ((Mode == BrushMode.Spiral || Mode == BrushMode.Rings) &&
                 AllowSpiralRingCursorLock) {
                 if (Input.GetKeyDown(KeyCode.Mouse0)) {
                     if (Physics.Raycast(ray, out _hologramHit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
                         return;
-                    
+
                 } else if (Input.GetKey(KeyCode.Mouse0) == false) {
                     // if the did not even started drawing
                     if (Physics.Raycast(ray, out _hologramHit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
                         return;
                 }
-                
+
             } else {
                 // if the did not even started drawing
                 if (Physics.Raycast(ray, out _hologramHit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
@@ -1270,8 +1268,7 @@ namespace TerrainPloughTools
             // clamping in max bounds of heightmap.
             var size = Mode == BrushMode.Spiral ? DotDiameter : realBrushSize;
 
-            if(HardwareAcceleration == false)
-            {
+            if (HardwareAcceleration == false) {
                 if (texelPos.x + size >= textureResolution)
                     texelPos.x += textureResolution - (texelPos.x + size);
                 if (texelPos.y + size >= textureResolution)
@@ -1468,7 +1465,7 @@ namespace TerrainPloughTools
 
             var originalColor = Gizmos.color;
             var originalMatrix = Gizmos.matrix;
-            Gizmos.color = _erasing? Color.red : Color.green;
+            Gizmos.color = _erasing ? Color.red : Color.green;
 
             var ray = RaycastCamera.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit, RaycastCamera.farClipPlane, 1 << Terrain.gameObject.layer) == false)
@@ -1500,15 +1497,13 @@ namespace TerrainPloughTools
             if (texelPos.y + size >= _heightmapResolution)
                 texelPos.y += _heightmapResolution - (texelPos.y + size);
             // Clamp the left side (x-axis)
-            if (texelPos.x < 0)
-            {
+            if (texelPos.x < 0) {
                 //size += texelPos.x; // Reduce size to account for the left out-of-bounds portion
                 texelPos.x = 0;     // Clamp to the left edge
             }
 
             // Clamp the top side (y-axis)
-            if (texelPos.y < 0)
-            {
+            if (texelPos.y < 0) {
                 //size += texelPos.y; // Reduce size to account for the top out-of-bounds portion
                 texelPos.y = 0;     // Clamp to the top edge
             }
@@ -1553,20 +1548,17 @@ namespace TerrainPloughTools
         #endregion
 
         #region API
-        public struct DataSets
-        {
+        public struct DataSets {
             public BrushmasksSet brushmasksSet;
             public TerrainLayersSet terrainLayersSet;
         }
-        public struct References
-        {
+        public struct References {
             public Terrain terrain;
             public Camera raycastCamera;
             public TerrainLayersSet layersSet;
             public BrushmasksSet brushmasksSet;
         }
-        public struct MutationData
-        {
+        public struct MutationData {
             public BrushMode mode;
 
             public int brushWidth;
@@ -1625,22 +1617,20 @@ namespace TerrainPloughTools
             return ploughTool;
         }
 
-        public DataSets GetDataCollections()
-        {
+        public DataSets GetDataCollections() {
             Debug.Assert(Brushes != null);
             Debug.Assert(TerrainLayers != null);
 
-            return new DataSets()
-            {
+            return new DataSets() {
                 brushmasksSet = Brushes,
                 terrainLayersSet = TerrainLayers
             };
         }
         public void SetReferences(References references) {
-            Debug.Assert(Terrain        == null, $"{name}:{nameof(TerrainPloughTool)}, variable {nameof(Terrain)} is already assigned.");
-            Debug.Assert(RaycastCamera  == null, $"{name}:{nameof(TerrainPloughTool)}, variable {nameof(RaycastCamera)} is already assigned.");
-            Debug.Assert(TerrainLayers  == null, $"{name}:{nameof(TerrainLayersSet)}, variable {nameof(TerrainLayers)} is already assigned.");
-            Debug.Assert(Brushes        == null, $"{name}:{nameof(BrushmasksSet)}, variable {nameof(Brushes)} is already assigned.");
+            Debug.Assert(Terrain == null, $"{name}:{nameof(TerrainPloughTool)}, variable {nameof(Terrain)} is already assigned.");
+            Debug.Assert(RaycastCamera == null, $"{name}:{nameof(TerrainPloughTool)}, variable {nameof(RaycastCamera)} is already assigned.");
+            Debug.Assert(TerrainLayers == null, $"{name}:{nameof(TerrainLayersSet)}, variable {nameof(TerrainLayers)} is already assigned.");
+            Debug.Assert(Brushes == null, $"{name}:{nameof(BrushmasksSet)}, variable {nameof(Brushes)} is already assigned.");
 
             Terrain = references.terrain;
             RaycastCamera = references.raycastCamera;
@@ -1648,8 +1638,7 @@ namespace TerrainPloughTools
             Brushes = references.brushmasksSet;
         }
 
-        public void Mutate(MutationData data)
-        {
+        public void Mutate(MutationData data) {
             Mode = data.mode;
             BrushWidth = Mathf.Max(data.brushWidth, 1);
             BrushHeight = Mathf.Max(data.brushHeight, 1);
@@ -1658,7 +1647,7 @@ namespace TerrainPloughTools
 
             ActiveBrushIndex = data.brushIndex;
 
-            Frequency = data.frequency % 2 == 0? data.frequency + 1 : data.frequency;
+            Frequency = data.frequency % 2 == 0 ? data.frequency + 1 : data.frequency;
             Amplitude = Mathf.Max(data.amplitude, 0.001f);
 
             DotDiameter = Mathf.Max(data.dotDiamter, 1);
@@ -1739,7 +1728,7 @@ namespace TerrainPloughTools
         #endregion
 
         [System.AttributeUsage(System.AttributeTargets.All, Inherited = false, AllowMultiple = false)]
-        public sealed class DebugInfoAttribute : Attribute {}
+        public sealed class DebugInfoAttribute : Attribute { }
     }
 }
 
