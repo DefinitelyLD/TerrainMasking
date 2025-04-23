@@ -23,6 +23,14 @@ using System.Runtime.CompilerServices;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using System;
+using System.Collections.Generic;
+using System.Numerics;
+using UnityEngine.Rendering.HighDefinition;
+using Matrix4x4 = UnityEngine.Matrix4x4;
+using Quaternion = UnityEngine.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
+using Vector4 = UnityEngine.Vector4;
 
 namespace TerrainPloughTools {
     /// <summary>
@@ -39,7 +47,6 @@ namespace TerrainPloughTools {
         }
 
         #region FEILDS
-
         [Header("Brush Settings:")]
 
         [Tooltip("The width of the plough brush in texels related to terrain's height map.")]
@@ -235,7 +242,6 @@ namespace TerrainPloughTools {
         /// The result of brush on heightmap.
         /// </summary>
         private RenderTexture _renderTexture;
-
         /*        /// <summary>
                 /// The brush bounding box from last frame.
                 /// </summary>
@@ -320,6 +326,11 @@ namespace TerrainPloughTools {
         /// </summary>
         private const float DESIRED_SPIRAL_ARC = 0.1f;
 
+        private Vector2 WATER_SIZE;
+        private bool[,] _waterArea;
+
+        private Mesh _waterMesh;
+
 #if LOG_ENABLED
         private Stopwatch _stopwatch = new ();
         private long _elaspedTime;
@@ -350,6 +361,9 @@ namespace TerrainPloughTools {
             Terrain.terrainData.terrainLayers = TerrainLayers.Layers;
 
             _brushPreviewMaterial = new Material(Shader.Find(BRUSH_PREVIEW_SHADER_NAME));
+            
+            _waterArea = new bool[Terrain.terrainData.heightmapResolution -1 , Terrain.terrainData.heightmapResolution -1];
+            WATER_SIZE = new Vector2(Terrain.terrainData.size.x, Terrain.terrainData.size.z);
 
 #if LOG_ENABLED
             Debug.Log($"Cloning Terrain: {Terrain.name}, Height Map.");
@@ -415,6 +429,8 @@ namespace TerrainPloughTools {
                 if (_dirtyHeightmap && (SyncMode == TerrainSyncMode.Auto || SyncMode == TerrainSyncMode.PartialAuto)) {
                     _dirtyHeightmap = false;
                     HeightmapHardSync();
+                    
+                    _waterMesh = GenerateWaterMesh(_waterArea);
                 }
                 if (_dirtyAlphamap && (SyncMode == TerrainSyncMode.Auto || SyncMode == TerrainSyncMode.PartialAuto)) {
                     _dirtyAlphamap = false;
@@ -432,6 +448,8 @@ namespace TerrainPloughTools {
                 if (_dirtyHeightmap && SyncMode == TerrainSyncMode.AfterClick) {
                     _dirtyHeightmap = false;
                     HeightmapHardSync();
+                    
+                    _waterMesh = GenerateWaterMesh(_waterArea);
                 }
 
                 if (_dirtyAlphamap && SyncMode == TerrainSyncMode.AfterClick) {
@@ -705,7 +723,30 @@ namespace TerrainPloughTools {
                             _ploughMaterial = new Material(Shader.Find(PLOUGH_SHADER));
                         }
 
-                        if (Mode != BrushMode.Paint) {
+                        if (Mode == BrushMode.Water)
+                        {
+                            float norm = size / (float)Terrain.terrainData.heightmapTexture.width;
+
+                            var y = (int)(uv.z * _waterArea.GetLength(1));
+                            var x = (int)(uv.x * _waterArea.GetLength(0));
+                            
+                            var length = (int)(norm * _waterArea.GetLength(1));
+                            
+                            print($"x: {x}, y: {y}, length: {length}, norm: {norm}");
+                            
+                            for (var j = y; j < y + length; j++)
+                            {
+                                for (var k = x; k < x + length; k++)
+                                {
+                                    _waterArea[j, k] = _erasing? false : true;
+                                    
+                                    //Debug.Log($"X: {k}, Y: {j}, Water: {_waterArea[j, k]}");
+                                }
+                            }
+                            
+                            _waterMesh = GenerateWaterMesh(_waterArea);
+                        }
+                        else if (Mode != BrushMode.Paint) {
                             var originalRenderTexture = RenderTexture.active;
 
                             if (_heightmapTexture != null) {
@@ -732,7 +773,6 @@ namespace TerrainPloughTools {
 
                                 Graphics.Blit(Terrain.terrainData.heightmapTexture, _heightmapTexture);
                             }
-
                             // coping current heightmap current the brush region
                             float normSize = size / (float)_heightmapResolution;
                             _ploughMaterial.SetVector("_Box", new Vector4(uv.x, uv.z, normSize, Angle));
@@ -863,6 +903,7 @@ namespace TerrainPloughTools {
 
                                 RenderTexture.active = originalRenderTexture;
                             }
+                            
                         } else {
                             var splatCount = Terrain.terrainData.alphamapTextureCount;
                             var lastSplatUsedChannels = Terrain.terrainData.alphamapLayers % 4;
@@ -941,7 +982,6 @@ namespace TerrainPloughTools {
 
                             _dirtyAlphamap = !sync;
                         }
-
                     } else {
 
                         if (_texelPos.x + size >= textureResolution)
@@ -1215,6 +1255,9 @@ namespace TerrainPloughTools {
             //_______________________________________________________________________________//
 
             RenderHologram();
+            
+            if(_waterMesh != null)
+                GameObject.Find("Pool").GetComponent<MeshFilter>().mesh = _waterMesh;
         }
 
         private void RenderHologram() {
@@ -1379,6 +1422,121 @@ namespace TerrainPloughTools {
                 _nBrushmaskViewHandle.Dispose();
             }
         }
+
+        private Mesh GenerateWaterMesh(bool[,] waterGrid)
+        {
+            int width = waterGrid.GetLength(1);   // X (columns)
+            int height = waterGrid.GetLength(0);  // Z (rows)
+            
+            var heights = Terrain.terrainData.GetHeights(0, 0, width + 1, height + 1);
+
+            Mesh mesh = new Mesh();
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
+
+            for (int z = 0; z < height; z++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (!waterGrid[z, x]) continue;
+
+                    int vertexIndex = vertices.Count;
+
+                    float posX = x * (WATER_SIZE.x / width);
+                    float posZ = z * (WATER_SIZE.y / height);
+                    float step = WATER_SIZE.x / width;
+
+
+                    bool downBottomRight = false;
+                    bool downTopLeft = false;
+                    bool downBottomLeft = false;
+                    bool downTopRight = false;
+
+                    if (x == width - 1) 
+                    {
+                        downTopRight = true;
+                        downBottomRight = true;
+                    }
+                    else if (_waterArea[z, x + 1] == false)
+                    {
+                        downTopRight = true;
+                        downBottomRight = true;
+                    }
+                    if (x == 0)
+                    {
+                        downTopLeft = true;
+                        downBottomLeft = true;
+                    }
+                    else if (_waterArea[z, x - 1] == false)
+                    {
+                        downTopLeft = true;
+                        downBottomLeft = true;
+                    }
+                    
+                    if (z == height - 1)
+                    {
+                        downBottomRight = true;
+                        downBottomLeft = true;
+                    }
+                    else if (_waterArea[z + 1, x] == false)
+                    {
+                        downBottomRight = true;
+                        downBottomLeft = true;
+                    }
+                    
+                    if (z == 0)
+                    {
+                        downTopRight = true;
+                        downTopLeft = true;
+                    }
+                    else if (_waterArea[z - 1, x] == false)
+                    {
+                        downTopRight = true;
+                        downTopLeft = true;
+                    }
+                    
+                    float bottomRightPosY = downBottomRight? -step : 0;
+                    float topRightPosY = downTopRight? -step : 0;
+                    float topLeftPosY = downTopLeft? -step : 0;
+                    float bottomLeftPosY = downBottomLeft? -step : 0;
+                    
+                    var topLeftHeight = heights[z, x] * Terrain.terrainData.size.y;
+                    var topRightHeight = heights[z, x + 1] * Terrain.terrainData.size.y;
+                    var bottomLeftHeight = heights[z + 1, x] * Terrain.terrainData.size.y;
+                    var bottomRightHeight = heights[z + 1, x + 1] * Terrain.terrainData.size.y;
+                    
+                    bottomRightPosY += bottomRightHeight;
+                    bottomLeftPosY += bottomLeftHeight;
+                    topRightPosY += topRightHeight;
+                    topLeftPosY += topLeftHeight;
+
+                    // Define 4 corners of the quad (flat on Y = 0)
+                    vertices.Add(new Vector3(posX + step, bottomRightPosY, posZ));     // Bottom-right
+                    vertices.Add(new Vector3(posX + step, topRightPosY, posZ - step)); // Top-right
+                    vertices.Add(new Vector3(posX, topLeftPosY, posZ - step));     // Top-left
+                    vertices.Add(new Vector3(posX, bottomLeftPosY, posZ));         // Bottom-left
+
+                    // First triangle (bottom-left, bottom-right, top-right)
+                    triangles.Add(vertexIndex);
+                    triangles.Add(vertexIndex + 1);
+                    triangles.Add(vertexIndex + 2);
+
+                    // Second triangle (bottom-left, top-right, top-left)
+                    triangles.Add(vertexIndex);
+                    triangles.Add(vertexIndex + 2);
+                    triangles.Add(vertexIndex + 3);
+                }
+            }
+
+            mesh.vertices = vertices.ToArray();
+            mesh.triangles = triangles.ToArray();
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            
+            return mesh;
+        }
+
 
         // Function to generate a grid mesh with fixed total width and height of 1
         public Mesh GenerateGrid(int resolution) {

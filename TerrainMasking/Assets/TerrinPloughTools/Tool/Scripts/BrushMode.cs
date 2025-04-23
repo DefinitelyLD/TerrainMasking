@@ -12,6 +12,7 @@ namespace TerrainPloughTools
         Smooth,
         Flatten,
         Eraser,
-        Paint
+        Paint,
+        Water
     }
 }

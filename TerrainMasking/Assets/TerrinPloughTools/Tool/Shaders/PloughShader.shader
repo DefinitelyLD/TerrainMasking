@@ -523,5 +523,41 @@ HLSLPROGRAM
             }
 ENDHLSL
         }
+
+        // add water pass
+        Pass {
+HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            float4 _Brush;
+            float4 _Hardness;
+
+            float4 frag (v2f i) : SV_Target
+            {
+                float2 uv = i.uv;
+                float2 pin = float2(uv.x - 0.5, uv.y - 0.5);
+                
+                float4 currentHeight = tex2D(_MainTex, uv);
+
+                if(IsPointInsideRotatedRectangle(pin, float2(0, 0), _Brush.xy, _Box.w) == false)
+                {
+                    return currentHeight;
+                }
+
+                float mag = sqrt(pow(pin.x, 2.0) + pow(pin.y, 2.0));
+                float theta = atan2(pin.y, pin.x) - radians(_Box.w);
+                
+                float newX = mag * cos(theta) + (_Brush.x * 0.5);
+                float newY = mag * sin(theta) + (_Brush.y * 0.5);
+
+                float valueY = abs(newY) / _Brush.y;
+                float valueX = abs(newX) / _Brush.x;
+
+                float mask = tex2D(_Mask, float2(valueX, valueY));
+                return mask * 1.0;
+            }
+ENDHLSL
+        }
     }
 }
