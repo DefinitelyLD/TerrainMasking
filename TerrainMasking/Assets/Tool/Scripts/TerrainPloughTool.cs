@@ -405,6 +405,8 @@ namespace TerrainPloughTools {
 
         private void Update() {
 
+            Terrain.Flush();
+
             _heightmapResolution = Terrain.terrainData.heightmapResolution;
             _alphamapResolution = Terrain.terrainData.alphamapResolution;
 
